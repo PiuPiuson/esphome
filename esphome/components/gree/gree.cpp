@@ -225,10 +225,7 @@ uint8_t GreeClimate::temperature_() {
 // }
 
 bool GreeClimate::on_receive(remote_base::RemoteReceiveData data) {
-  ESP_LOGI(TAG, "Received something");
-
   if (!data.expect_item(GREE_HEADER_MARK, GREE_HEADER_SPACE)) {
-    ESP_LOGI(TAG, "Header not ok");
     return false;
   }
 
@@ -236,7 +233,7 @@ bool GreeClimate::on_receive(remote_base::RemoteReceiveData data) {
 
   uint8_t state_frame[GREE_STATE_FRAME_SIZE]{};
 
-  for (int pos = 0; pos < GREE_STATE_FRAME_SIZE; pos++) {
+  for (int pos = 0; pos < 4; pos++) {
     for (int8_t bit = 0; bit < 8; bit++) {
       if (data.expect_item(GREE_BIT_MARK, GREE_ONE_SPACE)) {
         state_frame[pos] |= 1 << bit;
@@ -244,7 +241,7 @@ bool GreeClimate::on_receive(remote_base::RemoteReceiveData data) {
       }
 
       if (!data.expect_item(GREE_BIT_MARK, GREE_ZERO_SPACE)) {
-        ESP_LOGVV(TAG, "Byte %d bit %d fail", pos, bit);
+        ESP_LOGI(TAG, "Byte %d bit %d fail", pos, bit);
         return false;
       }
     }

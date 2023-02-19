@@ -293,7 +293,7 @@ bool GreeClimate::on_receive(remote_base::RemoteReceiveData data) {
   }
 
   uint8_t operation_mode = state_frame[0] & 0x0F;
-  if (operation_mode & GREE_MODE_ON != 0) {
+  if ((operation_mode & GREE_MODE_ON) != 0) {
     switch (operation_mode) {
       case GREE_MODE_COOL:
         this->mode = climate::CLIMATE_MODE_COOL;

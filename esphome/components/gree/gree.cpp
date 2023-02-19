@@ -264,6 +264,8 @@ bool GreeClimate::on_receive(remote_base::RemoteReceiveData data) {
     return false;
   }
 
+  ESP_LOGI(TAG, "Mid data OK");
+
   for (int pos = 4; pos < 8; pos++) {
     for (int8_t bit = 0; bit < 8; bit++) {
       if (data.expect_item(GREE_BIT_MARK, GREE_ONE_SPACE)) {

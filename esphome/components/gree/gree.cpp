@@ -269,6 +269,54 @@ bool GreeClimate::on_receive(remote_base::RemoteReceiveData data) {
   ESP_LOGI(TAG, "Received: %02X %02X %02X %02X %02X %02X %02X %02X", state_frame[0], state_frame[1], state_frame[2],
            state_frame[3], state_frame[4], state_frame[5], state_frame[6], state_frame[7]);
 
+  uint8_t temp = state_frame[1];
+  if (temp < (uint8_t) this->minimum_temperature_) {
+    temp += 16;
+  }
+
+  this->target_temperature = temp;
+
+  uint8_t fan_speed = state_frame[0] & 0xF0;
+  switch (fan_speed) {
+    case GREE_FAN_1:
+      this->fan_mode = climate::CLIMATE_FAN_LOW;
+      break;
+    case GREE_FAN_2:
+      this->fan_mode = climate::CLIMATE_FAN_MEDIUM;
+      break;
+    case GREE_FAN_3:
+      this->fan_mode = climate::CLIMATE_FAN_HIGH;
+      break;
+    case GREE_FAN_AUTO:
+    default:
+      this->fan_mode = climate::CLIMATE_FAN_AUTO;
+  }
+
+  uint8_t operation_mode = state_frame[0] & 0x0F;
+  if (operation_mode & GREE_MODE_ON != 0) {
+    switch (operation_mode) {
+      case GREE_MODE_COOL:
+        this->mode = climate::CLIMATE_MODE_COOL;
+        break;
+      case GREE_MODE_DRY:
+        this->mode = climate::CLIMATE_MODE_DRY;
+        break;
+      case GREE_MODE_HEAT:
+        this->mode = climate::CLIMATE_MODE_HEAT;
+        break;
+      case GREE_MODE_AUTO:
+        this->mode = climate::CLIMATE_MODE_AUTO;
+        break;
+      case GREE_MODE_FAN:
+        this->mode = climate::CLIMATE_MODE_FAN_ONLY;
+        break;
+      default:
+        this->mode = climate::CLIMATE_MODE_OFF;
+    }
+  } else {
+    this->mode = climate::CLIMATE_MODE_OFF;
+  }
+
   for (int pos = 4; pos < 8; pos++) {
     for (int8_t bit = 0; bit < 8; bit++) {
       if (data.expect_item(GREE_BIT_MARK, GREE_ONE_SPACE)) {
@@ -286,8 +334,6 @@ bool GreeClimate::on_receive(remote_base::RemoteReceiveData data) {
   uint8_t checksum = calculate_checksum_(state_frame);
 
   ESP_LOGI(TAG, "Checksum: %02X", checksum);
-
-  uint8_t fan_speed = state_frame[0];
 
   return false;
 }

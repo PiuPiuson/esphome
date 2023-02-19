@@ -247,6 +247,37 @@ bool GreeClimate::on_receive(remote_base::RemoteReceiveData data) {
     }
   }
 
+  if (!data.expect_item(GREE_BIT_MARK, GREE_ZERO_SPACE)) {
+    ESP_LOGI(TAG, "Invalid data received 0");
+    return false;
+  }
+  if (!data.expect_item(GREE_BIT_MARK, GREE_ONE_SPACE)) {
+    ESP_LOGI(TAG, "Invalid data received 1");
+    return false;
+  }
+  if (!data.expect_item(GREE_BIT_MARK, GREE_ZERO_SPACE)) {
+    ESP_LOGI(TAG, "Invalid data received 2");
+    return false;
+  }
+  if (!data.expect_item(GREE_BIT_MARK, GREE_MESSAGE_SPACE)) {
+    ESP_LOGI(TAG, "Invalid data received 3");
+    return false;
+  }
+
+  for (int pos = 4; pos < 8; pos++) {
+    for (int8_t bit = 0; bit < 8; bit++) {
+      if (data.expect_item(GREE_BIT_MARK, GREE_ONE_SPACE)) {
+        state_frame[pos] |= 1 << bit;
+        continue;
+      }
+
+      if (!data.expect_item(GREE_BIT_MARK, GREE_ZERO_SPACE)) {
+        ESP_LOGI(TAG, "Byte %d bit %d fail", pos, bit);
+        return false;
+      }
+    }
+  }
+
   ESP_LOGI(TAG, "Received: %02X %02X %02X %02X %02X %02X %02X %02X", state_frame[0], state_frame[1], state_frame[2],
            state_frame[3], state_frame[4], state_frame[5], state_frame[6], state_frame[7]);
 

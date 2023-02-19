@@ -36,17 +36,7 @@ void GreeClimate::transmit_state() {
     }
   }
 
-  // Calculate the checksum
-  if (this->model_ == GREE_YAN) {
-    remote_state[7] = ((remote_state[0] << 4) + (remote_state[1] << 4) + 0xC0);
-  } else {
-    remote_state[7] =
-        ((((remote_state[0] & 0x0F) + (remote_state[1] & 0x0F) + (remote_state[2] & 0x0F) + (remote_state[3] & 0x0F) +
-           ((remote_state[5] & 0xF0) >> 4) + ((remote_state[6] & 0xF0) >> 4) + ((remote_state[7] & 0xF0) >> 4) + 0x0A) &
-          0x0F)
-         << 4) |
-        (remote_state[7] & 0x0F);
-  }
+  remote_state[7] = calculate_checksum_(remote_state);
 
   auto transmit = this->transmitter_->transmit();
   auto *data = transmit.get_data();
@@ -85,6 +75,18 @@ void GreeClimate::transmit_state() {
   data->space(0);
 
   transmit.perform();
+}
+
+uint8_t GreeClimate::calculate_checksum_(const uint8_t state[]) {
+  if (this->model_ == GREE_YAN) {
+    return ((state[0] << 4) + (state[1] << 4) + 0xC0);
+  }
+
+  return ((((state[0] & 0x0F) + (state[1] & 0x0F) + (state[2] & 0x0F) + (state[3] & 0x0F) + ((state[5] & 0xF0) >> 4) +
+            ((state[6] & 0xF0) >> 4) + ((state[7] & 0xF0) >> 4) + 0x0A) &
+           0x0F)
+          << 4) |
+         (state[7] & 0x0F);
 }
 
 uint8_t GreeClimate::operation_mode_() {
@@ -151,6 +153,110 @@ uint8_t GreeClimate::vertical_swing_() {
 
 uint8_t GreeClimate::temperature_() {
   return (uint8_t) roundf(clamp<float>(this->target_temperature, GREE_TEMP_MIN, GREE_TEMP_MAX));
+}
+
+// bool GreeClimate::parse_state_frame_(const uint8_t frame[]) {
+//   // uint8_t checksum = 0;
+
+//   // for (int i = 0; i < (GREE_STATE_FRAME_SIZE - 1); i++) {
+//   //   checksum += frame[i];
+//   // }
+
+//   // if (frame[GREE_STATE_FRAME_SIZE - 1] != checksum) {
+//   //   return false;
+//   // }
+
+//   // uint8_t mode = frame[5];
+//   // if (mode & GREE_MODE_ON) {
+//   //   switch (mode & 0xF0) {
+//   //     case GREE_MODE_COOL:
+//   //       this->mode = climate::CLIMATE_MODE_COOL;
+//   //       break;
+//   //     case GREE_MODE_DRY:
+//   //       this->mode = climate::CLIMATE_MODE_DRY;
+//   //       break;
+//   //     case GREE_MODE_HEAT:
+//   //       this->mode = climate::CLIMATE_MODE_HEAT;
+//   //       break;
+//   //     case GREE_MODE_AUTO:
+//   //       this->mode = climate::CLIMATE_MODE_HEAT_COOL;
+//   //       break;
+//   //     case GREE_MODE_FAN:
+//   //       this->mode = climate::CLIMATE_MODE_FAN_ONLY;
+//   //       break;
+//   //   }
+//   // } else {
+//   //   this->mode = climate::CLIMATE_MODE_OFF;
+//   // }
+//   // uint8_t temperature = frame[6];
+//   // if (!(temperature & 0xC0)) {
+//   //   this->target_temperature = temperature >> 1;
+//   // }
+//   // uint8_t fan_mode = frame[8];
+//   // uint8_t swing_mode = frame[9];
+//   // if (fan_mode & 0xF && swing_mode & 0xF) {
+//   //   this->swing_mode = climate::CLIMATE_SWING_BOTH;
+//   // } else if (fan_mode & 0xF) {
+//   //   this->swing_mode = climate::CLIMATE_SWING_VERTICAL;
+//   // } else if (swing_mode & 0xF) {
+//   //   this->swing_mode = climate::CLIMATE_SWING_HORIZONTAL;
+//   // } else {
+//   //   this->swing_mode = climate::CLIMATE_SWING_OFF;
+//   // }
+//   // switch (fan_mode & 0xF0) {
+//   //   case GREE_FAN_1:
+//   //   case GREE_FAN_2:
+//   //   case GREE_FAN_SILENT:
+//   //     this->fan_mode = climate::CLIMATE_FAN_LOW;
+//   //     break;
+//   //   case GREE_FAN_3:
+//   //     this->fan_mode = climate::CLIMATE_FAN_MEDIUM;
+//   //     break;
+//   //   case GREE_FAN_4:
+//   //   case GREE_FAN_5:
+//   //     this->fan_mode = climate::CLIMATE_FAN_HIGH;
+//   //     break;
+//   //   case GREE_FAN_AUTO:
+//   //     this->fan_mode = climate::CLIMATE_FAN_AUTO;
+//   //     break;
+//   // }
+//   // this->publish_state();
+//   return false;
+// }
+
+bool GreeClimate::on_receive(remote_base::RemoteReceiveData data) {
+  if (!data.expect_item(GREE_HEADER_MARK, GREE_HEADER_SPACE)) {
+    return false;
+  }
+
+  ESP_LOGI(TAG, "Header OK");
+
+  uint8_t state_frame[GREE_STATE_FRAME_SIZE]{};
+
+  for (int pos = 0; pos < GREE_STATE_FRAME_SIZE; pos++) {
+    for (int8_t bit = 0; bit < 8; bit++) {
+      if (data.expect_item(GREE_BIT_MARK, GREE_ONE_SPACE)) {
+        state_frame[pos] |= 1 << bit;
+        continue;
+      }
+
+      if (!data.expect_item(GREE_BIT_MARK, GREE_ZERO_SPACE)) {
+        ESP_LOGVV(TAG, "Byte %d bit %d fail", pos, bit);
+        return false;
+      }
+    }
+  }
+
+  ESP_LOGI(TAG, "Received: %02X %02X %02X %02X %02X %02X %02X %02X", state_frame[0], state_frame[1], state_frame[2],
+           state_frame[3], state_frame[4], state_frame[5], state_frame[6], state_frame[7]);
+
+  uint8_t checksum = calculate_checksum_(state_frame);
+
+  ESP_LOGI(TAG, "Checksum: %02X", checksum);
+
+  uint8_t fan_speed = state_frame[0];
+
+  return false;
 }
 
 }  // namespace gree

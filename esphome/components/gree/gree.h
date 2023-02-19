@@ -91,6 +91,10 @@ class GreeClimate : public climate_ir::ClimateIR {
   uint8_t temperature_();
 
   Model model_{};
+
+  bool on_receive(remote_base::RemoteReceiveData data) override;
+
+  uint8_t calculate_checksum_(const uint8_t state[]);
 };
 
 }  // namespace gree

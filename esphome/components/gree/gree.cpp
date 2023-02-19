@@ -269,13 +269,6 @@ bool GreeClimate::on_receive(remote_base::RemoteReceiveData data) {
   ESP_LOGI(TAG, "Received: %02X %02X %02X %02X %02X %02X %02X %02X", state_frame[0], state_frame[1], state_frame[2],
            state_frame[3], state_frame[4], state_frame[5], state_frame[6], state_frame[7]);
 
-  uint8_t temp = state_frame[1];
-  if (temp < (uint8_t) this->minimum_temperature_) {
-    temp += 16;
-  }
-
-  this->target_temperature = temp;
-
   uint8_t fan_speed = state_frame[0] & 0xF0;
   switch (fan_speed) {
     case GREE_FAN_1:
@@ -293,7 +286,7 @@ bool GreeClimate::on_receive(remote_base::RemoteReceiveData data) {
   }
 
   uint8_t operation_mode = state_frame[0] & 0x0F;
-  if ((operation_mode & GREE_MODE_ON) != 0) {
+  if ((operation_mode & GREE_MODE_ON) == GREE_MODE_ON) {
     switch (operation_mode) {
       case GREE_MODE_COOL:
         this->mode = climate::CLIMATE_MODE_COOL;
@@ -314,8 +307,15 @@ bool GreeClimate::on_receive(remote_base::RemoteReceiveData data) {
         this->mode = climate::CLIMATE_MODE_OFF;
     }
   } else {
+    ESP_LOGI("TAG", "OpMode %02X %02X", operation_mode, operation_mode & GREE_MODE_ON);
     this->mode = climate::CLIMATE_MODE_OFF;
   }
+
+  uint8_t temp = state_frame[1];
+  if (temp < (uint8_t) this->minimum_temperature_) {
+    temp += 16;
+  }
+  this->target_temperature = temp;
 
   this->publish_state();
   return true;

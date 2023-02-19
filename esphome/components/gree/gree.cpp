@@ -225,7 +225,10 @@ uint8_t GreeClimate::temperature_() {
 // }
 
 bool GreeClimate::on_receive(remote_base::RemoteReceiveData data) {
+  ESP_LOGI(TAG, "Received something");
+
   if (!data.expect_item(GREE_HEADER_MARK, GREE_HEADER_SPACE)) {
+    ESP_LOGI(TAG, "Header not ok");
     return false;
   }
 

@@ -317,6 +317,7 @@ bool GreeClimate::on_receive(remote_base::RemoteReceiveData data) {
     this->mode = climate::CLIMATE_MODE_OFF;
   }
 
+  this->publish_state();
   return true;
 
   for (int pos = 4; pos < 8; pos++) {

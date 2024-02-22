@@ -35,10 +35,6 @@ void DaikinHpcClimate::setup() {
 }
 
 void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
-  for (auto d : data) {
-    ESP_LOGW(TAG, "0X%02x", d);
-  }
-
   switch (modbusSendQueue.front()) {
     case Register::WaterTemperature:
       waterTemperature_->publish_state(dataToTemperature(data));

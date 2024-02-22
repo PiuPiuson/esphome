@@ -53,6 +53,7 @@ class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice {
     bool lock : 1;
     uint8_t : 2;
     bool onOff : 1;
+    uint8_t : 8;
   };
 
   std::queue<Register> modbusSendQueue{};

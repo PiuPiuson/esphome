@@ -3,7 +3,7 @@ import esphome.config_validation as cv
 from esphome.components import modbus
 from esphome.const import CONF_ID, CONF_NAME
 
-AUTO_LOAD = ["modbus"]
+AUTO_LOAD = ["sensor", "modbus"]
 
 daikin_hpc_ns = cg.esphome_ns.namespace("daikin_hpc")
 DaikinHpcClimate = daikin_hpc_ns.class_("DaikinHpcClimate", cg.PollingComponent, modbus.ModbusDevice)

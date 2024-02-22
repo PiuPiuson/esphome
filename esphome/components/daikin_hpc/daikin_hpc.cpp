@@ -32,6 +32,7 @@ void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
 
 void DaikinHpcClimate::update() {
   this->send(MODBUS_CMD_READ_REGISTER, static_cast<uint16_t>(Register::WaterTemperature), 1);
+  this->send(MODBUS_CMD_READ_REGISTER, static_cast<uint16_t>(Register::AirTemperature), 1);
 }
 
 void DaikinHpcClimate::dump_config() {

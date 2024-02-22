@@ -10,7 +10,7 @@
 namespace esphome {
 namespace daikin_hpc {
 
-class DAIKIN_HPC : public PollingComponent, public modbus::ModbusDevice {
+class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice {
  public:
   void update() override;
 
@@ -19,7 +19,7 @@ class DAIKIN_HPC : public PollingComponent, public modbus::ModbusDevice {
   void dump_config() override;
 
  protected:
-  DAIKIN_HPC *daikin_hpc_;
+  DaikinHpcClimate *daikin_hpc_;
 
  private:
   enum class Register : uint8_t {

@@ -7,16 +7,15 @@ namespace daikin_hpc {
 
 static const char *const TAG = "daikin_hpc";
 
-static const uint8_t PZEM_CMD_READ_IN_REGISTERS = 0x04;
-static const uint8_t PZEM_CMD_RESET_ENERGY = 0x42;
-static const uint8_t PZEM_REGISTER_COUNT = 10;  // 10x 16-bit registers
+static constexpr uint8_t
 
-void DAIKIN_HPC::on_modbus_data(const std::vector<uint8_t> &data) {}
+    void
+    DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {}
 
-void DAIKIN_HPC::update() {}
+void DaikinHpcClimate::update() {}
 
-void DAIKIN_HPC::dump_config() {
-  ESP_LOGCONFIG(TAG, "DAIKIN_HPC:");
+void DaikinHpcClimate::dump_config() {
+  ESP_LOGCONFIG(TAG, "DaikinHpcClimate:");
   ESP_LOGCONFIG(TAG, "  Address: 0x%02X", this->address_);
 }
 

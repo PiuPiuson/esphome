@@ -21,3 +21,5 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await modbus.register_modbus_device(var, config)
+
+    cg.add(var.set_my_required_key(config[CONF_USE_FAHRENHEIT]))

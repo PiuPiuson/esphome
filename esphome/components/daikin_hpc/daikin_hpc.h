@@ -20,23 +20,11 @@ class DAIKIN_HPC : public PollingComponent, public modbus::ModbusDevice {
 
   void dump_config() override;
 
- protected:
-  template<typename... Ts> friend class ResetEnergyAction;
-  sensor::Sensor *voltage_sensor_{nullptr};
-  sensor::Sensor *current_sensor_{nullptr};
-  sensor::Sensor *power_sensor_{nullptr};
-  sensor::Sensor *energy_sensor_{nullptr};
-  sensor::Sensor *frequency_sensor_{nullptr};
-  sensor::Sensor *power_factor_sensor_{nullptr};
-};
-
-template<typename... Ts> class ResetEnergyAction : public Action<Ts...> {
- public:
-  ResetEnergyAction(DAIKIN_HPC *daikin_hpc) : daikin_hpc_(daikin_hpc) {}
-
-  void play(Ts... x) override { this->daikin_hpc_->reset_energy_(); }
+  /// Set use of Fahrenheit units
+  void set_fahrenheit(bool value) { this->fahrenheit_ = value; }
 
  protected:
+  bool fahrenheit_{false};
   DAIKIN_HPC *daikin_hpc_;
 };
 

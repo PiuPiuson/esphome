@@ -1,6 +1,6 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import modbus, climate
+from esphome.components import modbus
 from esphome.const import CONF_ID
 
 AUTO_LOAD = ["modbus"]
@@ -10,7 +10,7 @@ DaikinBrcClimate = daikin_hpc_ns.class_("DaikinHpcClimate")
 
 CONF_USE_FAHRENHEIT = "use_fahrenheit"
 
-CONFIG_SCHEMA = climate.CLIMATE_CONTROL_ACTION_SCHEMA.extend (
+CONFIG_SCHEMA = cv.ENTITY_BASE_SCHEMA.extend (
     cv.Schema(
         {
             cv.GenerateID(): cv.declare_id(DaikinBrcClimate),

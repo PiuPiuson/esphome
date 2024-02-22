@@ -23,7 +23,9 @@ void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
   }
 }
 
-void DaikinHpcClimate::update() { this->send(MODBUS_CMD_READ_REGISTERS, Register::WaterTemperature, 1); }
+void DaikinHpcClimate::update() {
+  this->send(MODBUS_CMD_READ_REGISTERS, static_cast<uint16_t>(Register::WaterTemperature), 1);
+}
 
 void DaikinHpcClimate::dump_config() {
   ESP_LOGCONFIG(TAG, "DaikinHpcClimate:");

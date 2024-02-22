@@ -10,7 +10,7 @@ DaikinBrcClimate = daikin_hpc_ns.class_("DaikinHpcClimate")
 
 CONF_USE_FAHRENHEIT = "use_fahrenheit"
 
-CONFIG_SCHEMA = cv.Schema(
+CONFIG_SCHEMA = cv.COMPONENT_SCHEMA.extend(
     {
         cv.Optional(CONF_USE_FAHRENHEIT, default=False): cv.boolean,
     }

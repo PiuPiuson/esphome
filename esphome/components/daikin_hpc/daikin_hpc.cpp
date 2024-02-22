@@ -10,6 +10,15 @@ static const char *const TAG = "daikin_hpc";
 static constexpr uint8_t MODBUS_CMD_READ_REGISTER = 3;
 static constexpr uint8_t MODBUS_CMD_WRITE_REGISTER = 6;
 
+float dataToTemperature(const std::vector<uint8_t> &data) {
+  if (data.size != 2) {
+    ESP_LOGW(TAG, "Tried to convert invalid data to temperature");
+    return 0;
+  }
+
+  return (static_cast<int16_t>(data[0]) << 8) | data[1];
+}
+
 void DaikinHpcClimate::setup() {
   waterTemperature_->set_icon("mdi:thermometer");
   waterTemperature_->set_unit_of_measurement("°C");
@@ -32,13 +41,12 @@ void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
 
   switch (modbusSendQueue.front()) {
     case Register::WaterTemperature:
-      int16_t temp = (static_cast<int16_t>(data[0]) << 8) | data[1];
-      waterTemperature_->publish_state(temp * 0.1);
+      waterTemperature_->publish_state(dataToTemperature(data));
       break;
 
     case Register::AirTemperature:
       int16_t temp = (static_cast<int16_t>(data[0]) << 8) | data[1];
-      airTemperature_->publish_state(temp * 0.1);
+      airTemperature_->publish_state(dataToTemperature(data));
       break;
   }
 

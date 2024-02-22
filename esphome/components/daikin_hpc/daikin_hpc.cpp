@@ -40,14 +40,6 @@ void DaikinHpcClimate::setup() {
   motorSpeed_->set_accuracy_decimals(0);
   motorSpeed_->set_name("Fan Speed");
   motorSpeed_->set_entity_category(EntityCategory::ENTITY_CATEGORY_DIAGNOSTIC);
-
-  minSpeedInMinAndNightMode_->set_icon("mdi:fan");
-  minSpeedInMinAndNightMode_->set_name("Fan Speed");
-  minSpeedInMinAndNightMode_->set_entity_category(EntityCategory::ENTITY_CATEGORY_DIAGNOSTIC);
-  minSpeedInMinAndNightMode_->traits.set_unit_of_measurement("rpm");
-  minSpeedInMinAndNightMode_->traits.set_max_value(1500);
-  minSpeedInMinAndNightMode_->traits.set_min_value(400);
-  minSpeedInMinAndNightMode_->traits.set_step(10);
 }
 
 void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
@@ -58,10 +50,6 @@ void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
 
     case Register::AirTemperature:
       airTemperature_->publish_state(dataToTemperature(data));
-      break;
-
-    case Register::MinSpeedInMinAndNightMode:
-      minSpeedInMinAndNightMode_->publish_state(dataToUint16(data));
       break;
 
     case Register::MotorSpeed:

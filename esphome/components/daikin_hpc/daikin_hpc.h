@@ -5,7 +5,6 @@
 #include "esphome/components/modbus/modbus.h"
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/switch/switch.h"
-#include "esphome/components/number/number.h"
 
 #include <vector>
 #include <queue>
@@ -29,8 +28,6 @@ class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice {
   sensor::Sensor *airTemperature_ = new sensor::Sensor();
   sensor::Sensor *motorSpeed_ = new sensor::Sensor();
 
-  number::Number *minSpeedInMinAndNightMode_ = new number::Number();
-
  private:
   enum class Register : uint8_t {
     AirTemperature = 0,
@@ -38,7 +35,6 @@ class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice {
     MotorSpeed = 9,
     Config = 201,
     AbsoluteSetPoint = 231,
-    MinSpeedInMinAndNightMode = 210
   };
 
   enum class FanMode : uint8_t {

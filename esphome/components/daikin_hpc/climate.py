@@ -6,12 +6,13 @@ from esphome.const import CONF_ID
 AUTO_LOAD = ["modbus"]
 
 daikin_hpc_ns = cg.esphome_ns.namespace("daikin_hpc")
-DaikinBrcClimate = daikin_hpc_ns.class_("DaikinHpcClimate")
+DaikinHpcClimate = daikin_hpc_ns.class_("DaikinHpcClimate")
 
 CONF_USE_FAHRENHEIT = "use_fahrenheit"
 
 CONFIG_SCHEMA = cv.COMPONENT_SCHEMA.extend(
     {
+        cv.GenerateID(): cv.declare_id(DaikinHpcClimate),
         cv.Optional(CONF_USE_FAHRENHEIT, default=False): cv.boolean,
     }
 )

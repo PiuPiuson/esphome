@@ -22,7 +22,7 @@ uint16_t DaikinHpcClimate::dataToUint16(const std::vector<uint8_t> &data) {
 inline float DaikinHpcClimate::dataToTemperature(const std::vector<uint8_t> &data) { return dataToUint16(data) * 0.1; }
 
 void DaikinHpcClimate::setup() {
-  waterTemperature_->set_icon("mdi:thermometer");
+  waterTemperature_->set_icon("mdi:thermometer-water");
   waterTemperature_->set_unit_of_measurement("°C");
   waterTemperature_->set_accuracy_decimals(1);
   waterTemperature_->set_name("Water Temperature");
@@ -40,6 +40,12 @@ void DaikinHpcClimate::setup() {
   motorSpeed_->set_accuracy_decimals(0);
   motorSpeed_->set_name("Fan Speed");
   motorSpeed_->set_entity_category(EntityCategory::ENTITY_CATEGORY_DIAGNOSTIC);
+
+  controlLock_->set_icon("mdi:lock");
+  controlLock_->set_name("Control Lock");
+
+  onOff_->set_icon("mdi:power");
+  onOff_->set_name("On / Off");
 }
 
 void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
@@ -53,6 +59,8 @@ void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
       break;
 
     case Register::MotorSpeed:
+      motorSpeed_->publish_state(dataToUint16(data));
+
     case Register::Config:
     case Register::AbsoluteSetPoint:
     default:

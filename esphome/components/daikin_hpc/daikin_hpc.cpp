@@ -7,7 +7,8 @@ namespace daikin_hpc {
 
 static const char *const TAG = "daikin_hpc";
 
-static constexpr uint8_t MODBUS_CMD_READ_REGISTERS = 4;
+static constexpr uint8_t MODBUS_CMD_READ_REGISTER = 3;
+static constexpr uint8_t MODBUS_CMD_WRITE_REGISTER = 3;
 
 void DaikinHpcClimate::setup() {
   waterTemperature_->set_icon("mdi:thermometer");

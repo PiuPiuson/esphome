@@ -4,6 +4,8 @@
 #include "esphome/core/component.h"
 #include "esphome/components/modbus/modbus.h"
 #include "esphome/components/sensor/sensor.h"
+#include "esphome/components/switch/switch.h"
+#include "esphome/components/number/number.h"
 
 #include <vector>
 #include <queue>
@@ -25,6 +27,9 @@ class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice {
 
   sensor::Sensor *waterTemperature_ = new sensor::Sensor();
   sensor::Sensor *airTemperature_ = new sensor::Sensor();
+  sensor::Sensor *motorSpeed_ = new sensor::Sensor();
+
+  number::Number *minSpeedInMinAndNightMode_ = new number::Number();
 
  private:
   enum class Register : uint8_t {
@@ -33,6 +38,7 @@ class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice {
     MotorSpeed = 9,
     Config = 201,
     AbsoluteSetPoint = 231,
+    MinSpeedInMinAndNightMode = 210
   };
 
   enum class FanMode : uint8_t {
@@ -55,6 +61,7 @@ class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice {
   void readNextRegister();
 
   float dataToTemperature(const std::vector<uint8_t> &data);
+  uint16_t dataToUint16(const std::vector<uint8_t> &data);
 };
 
 }  // namespace daikin_hpc

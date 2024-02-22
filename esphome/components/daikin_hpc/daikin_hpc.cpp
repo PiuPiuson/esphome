@@ -10,14 +10,16 @@ static const char *const TAG = "daikin_hpc";
 static constexpr uint8_t MODBUS_CMD_READ_REGISTER = 3;
 static constexpr uint8_t MODBUS_CMD_WRITE_REGISTER = 6;
 
-float DaikinHpcClimate::dataToTemperature(const std::vector<uint8_t> &data) {
+unt16_t DaikinHpcClimate::dataToUint16(const std::vector<uint8_t> &data) {
   if (data.size() != 2) {
-    ESP_LOGW(TAG, "Tried to convert invalid data to temperature");
+    ESP_LOGW(TAG, "Tried to convert invalid data to unt16");
     return 0;
   }
 
-  return ((static_cast<int16_t>(data[0]) << 8) | data[1]) * 0.1;
+  return (static_cast<unt16_t>(data[0]) << 8) | data[1];
 }
+
+inline float DaikinHpcClimate::dataToTemperature(const std::vector<uint8_t> &data) { return dataToUint16(data) * 0.1; }
 
 void DaikinHpcClimate::setup() {
   waterTemperature_->set_icon("mdi:thermometer");
@@ -32,6 +34,20 @@ void DaikinHpcClimate::setup() {
   airTemperature_->set_name("Air Temperature");
   airTemperature_->set_entity_category(EntityCategory::ENTITY_CATEGORY_NONE);
   airTemperature_->set_internal(false);
+
+  motorSpeed_->set_icon("mdi:fan");
+  motorSpeed_->set_unit_of_measurement("rpm");
+  motorSpeed_->set_accuracy_decimals(0);
+  motorSpeed_->set_name("Fan Speed");
+  motorSpeed_->set_entity_category(EntityCategory::ENTITY_CATEGORY_DIAGNOSTIC);
+
+  minSpeedInMinAndNightMode_->set_icon("mdi:fan");
+  minSpeedInMinAndNightMode_->set_name("Fan Speed");
+  minSpeedInMinAndNightMode_->set_entity_category(EntityCategory::ENTITY_CATEGORY_DIAGNOSTIC);
+  minSpeedInMinAndNightMode_->traits.set_unit_of_measurement("rpm");
+  minSpeedInMinAndNightMode_->traits.set_max_value(1500);
+  minSpeedInMinAndNightMode_->traits.set_min_value(400);
+  minSpeedInMinAndNightMode_->traits.set_step(10);
 }
 
 void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
@@ -42,6 +58,10 @@ void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
 
     case Register::AirTemperature:
       airTemperature_->publish_state(dataToTemperature(data));
+      break;
+
+    case Register::MinSpeedInMinAndNightMode:
+      minSpeedInMinAndNightMode_->publish_state(dataToUint16(data));
       break;
 
     case Register::MotorSpeed:
@@ -62,6 +82,7 @@ void DaikinHpcClimate::update() {
 
   modbusSendQueue.push(Register::WaterTemperature);
   modbusSendQueue.push(Register::AirTemperature);
+  modbusSendQueue.push(Register::MotorSpeed);
 
   readNextRegister();
 }

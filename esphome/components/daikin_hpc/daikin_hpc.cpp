@@ -49,6 +49,9 @@ void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
       airTemperature_->publish_state(dataToTemperature(data));
       break;
 
+    case Register::MotorSpeed:
+    case Register::Config:
+    case Register::AbsoluteSetPoint:
     default:
       break;
   }

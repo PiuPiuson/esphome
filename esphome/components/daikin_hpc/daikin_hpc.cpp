@@ -21,7 +21,7 @@ uint16_t DaikinHpcClimate::dataToUint16(const std::vector<uint8_t> &data) {
 
 float DaikinHpcClimate::dataToTemperature(const std::vector<uint8_t> &data) { return dataToUint16(data) * 0.1; }
 
-DaikinHpcClimate::ConfigRegister dataToConfigRegister(const std::vector<uint8_t> &data) {
+DaikinHpcClimate::ConfigRegister DaikinHpcClimate::dataToConfigRegister(const std::vector<uint8_t> &data) {
   const auto raw = dataToUint16(data);
 
   ConfigRegister config{};

@@ -10,7 +10,7 @@ static const char *const TAG = "daikin_hpc";
 static constexpr uint8_t MODBUS_CMD_READ_REGISTER = 3;
 static constexpr uint8_t MODBUS_CMD_WRITE_REGISTER = 6;
 
-unt16_t DaikinHpcClimate::dataToUint16(const std::vector<uint8_t> &data) {
+uint16_t DaikinHpcClimate::dataToUint16(const std::vector<uint8_t> &data) {
   if (data.size() != 2) {
     ESP_LOGW(TAG, "Tried to convert invalid data to unt16");
     return 0;

@@ -37,7 +37,7 @@ class DAIKIN_HPC : public PollingComponent, public modbus::ModbusDevice {
     Max = 3,
   };
 
-  struct ConfigRegister __attribute__((packed, aligned(1))) {
+  struct __attribute__((packed, aligned(1))) ConfigRegister {
     FanMode fanMode : 3;
     void : 1;
     bool lock : 1;

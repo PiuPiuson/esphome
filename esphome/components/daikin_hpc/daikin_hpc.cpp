@@ -7,10 +7,7 @@ namespace daikin_hpc {
 
 static const char *const TAG = "daikin_hpc";
 
-static constexpr uint8_t
-
-    void
-    DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {}
+void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {}
 
 void DaikinHpcClimate::update() {}
 

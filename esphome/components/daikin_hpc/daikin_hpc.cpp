@@ -19,7 +19,7 @@ void DaikinHpcClimate::setup() {
 
 void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
   for (const auto b : data) {
-    ESP_LOGI("0x%02X", b);
+    ESP_LOGI(TAG, "0x%02X", b);
   }
 }
 

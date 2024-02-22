@@ -24,6 +24,7 @@ class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice {
   DaikinHpcClimate *daikin_hpc_;
 
   sensor::Sensor *waterTemperature_ = new sensor::Sensor();
+  sensor::Sensor *airTemperature_ = new sensor::Sensor();
 
  private:
   enum class Register : uint8_t {

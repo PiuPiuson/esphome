@@ -15,8 +15,14 @@ void DaikinHpcClimate::setup() {
   waterTemperature_->set_unit_of_measurement("°C");
   waterTemperature_->set_accuracy_decimals(1);
   waterTemperature_->set_name("Water Temperature");
-  waterTemperature_->set_entity_category(EntityCategory::ENTITY_CATEGORY_NONE);
-  waterTemperature_->set_internal(false);
+  waterTemperature_->set_entity_category(EntityCategory::ENTITY_CATEGORY_DIAGNOSTIC);
+
+  airTemperature_->set_icon("mdi:thermometer");
+  airTemperature_->set_unit_of_measurement("°C");
+  airTemperature_->set_accuracy_decimals(1);
+  airTemperature_->set_name("Air Temperature");
+  airTemperature_->set_entity_category(EntityCategory::ENTITY_CATEGORY_NONE);
+  airTemperature_->set_internal(false);
 }
 
 void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
@@ -24,12 +30,20 @@ void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
     ESP_LOGW(TAG, "0X%02x", d);
   }
 
+  switch (modbusSendQueue.front()) {
+    case Register::WaterTemperature:
+      int16_t temp = (static_cast<int16_t>(data[0]) << 8) | data[1];
+      waterTemperature_->publish_state(temp * 0.1);
+      break;
+
+    case Register::AirTemperature:
+      int16_t temp = (static_cast<int16_t>(data[0]) << 8) | data[1];
+      airTemperature_->publish_state(temp * 0.1);
+      break;
+  }
+
   modbusSendQueue.pop();
   readNextRegister();
-  return;
-
-  int16_t temp = (static_cast<int16_t>(data[0]) << 8) | data[1];
-  waterTemperature_->publish_state(temp * 0.1);
 }
 
 void DaikinHpcClimate::update() {

@@ -6,7 +6,7 @@ from esphome.const import CONF_ID
 AUTO_LOAD = ["modbus"]
 
 daikin_hpc_ns = cg.esphome_ns.namespace("daikin_hpc")
-DaikinHpcClimate = daikin_hpc_ns.class_("DaikinHpcClimate")
+DaikinHpcClimate = daikin_hpc_ns.class_("DaikinHpcClimate", cg.PollingComponent, modbus.ModbusDevice)
 
 CONF_USE_FAHRENHEIT = "use_fahrenheit"
 

@@ -73,7 +73,7 @@ void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
     case Register::Config: {
       auto config = dataToConfigRegister(data);
       ESP_LOGW(TAG, "Mode: %u | Lock: %u | On / Off: %u | 0x%04X", config.fanMode, config.lock, config.onOff,
-               *(uint16_t) &config);
+               *(uint16_t *) &config);
     }
     case Register::AbsoluteSetPoint:
     default:

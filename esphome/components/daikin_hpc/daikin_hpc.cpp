@@ -71,6 +71,8 @@ void DaikinHpcClimate::update() {
   modbusSendQueue.push(Register::WaterTemperature);
   modbusSendQueue.push(Register::AirTemperature);
   modbusSendQueue.push(Register::MotorSpeed);
+  modbusSendQueue.push(Register::Config);
+  modbusSendQueue.push(Register::AbsoluteSetPoint);
 
   readNextRegister();
 }

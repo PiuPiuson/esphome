@@ -10,11 +10,11 @@ DaikinBrcClimate = daikin_hpc_ns.class_("DaikinHpcClimate")
 
 CONF_USE_FAHRENHEIT = "use_fahrenheit"
 
-CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
+CONFIG_SCHEMA = cv.Schema(
     {
         cv.Optional(CONF_USE_FAHRENHEIT, default=False): cv.boolean,
     }
-).extend(modbus.modbus_device_schema(0x01))
+)
 
 
 async def to_code(config):

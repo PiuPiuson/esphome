@@ -11,7 +11,7 @@ static constexpr uint8_t MODBUS_CMD_READ_REGISTER = 3;
 static constexpr uint8_t MODBUS_CMD_WRITE_REGISTER = 6;
 
 float DaikinHpcClimate::dataToTemperature(const std::vector<uint8_t> &data) {
-  if (data.size != 2) {
+  if (data.size() != 2) {
     ESP_LOGW(TAG, "Tried to convert invalid data to temperature");
     return 0;
   }

@@ -39,9 +39,9 @@ class DAIKIN_HPC : public PollingComponent, public modbus::ModbusDevice {
 
   struct __attribute__((packed, aligned(1))) ConfigRegister {
     FanMode fanMode : 3;
-    void undefined : 1;
+    uint8_t : 1;
     bool lock : 1;
-    void undefined2 : 2;
+    uint8_t : 2;
     bool onOff : 1;
   };
 };

@@ -24,7 +24,8 @@ void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
     return;
   }
 
-  waterTemperature_->publish_state((const int16_t) &data[0] * 0.1);
+  int16_t temp = (int16_t) ((uint16_t) &data[0]);
+  waterTemperature_->publish_state(temp * 0.1);
 }
 
 void DaikinHpcClimate::update() {

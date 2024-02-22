@@ -12,6 +12,7 @@ namespace daikin_hpc {
 
 class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice {
  public:
+  void setup() override;
   void update() override;
 
   void on_modbus_data(const std::vector<uint8_t> &data) override;
@@ -20,6 +21,8 @@ class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice {
 
  protected:
   DaikinHpcClimate *daikin_hpc_;
+
+  sensor::Sensor *waterTemperature_ = new sensor::Sensor();
 
  private:
   enum class Register : uint8_t {

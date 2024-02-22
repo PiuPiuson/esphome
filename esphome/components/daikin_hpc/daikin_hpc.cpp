@@ -7,9 +7,15 @@ namespace daikin_hpc {
 
 static const char *const TAG = "daikin_hpc";
 
+void DaikinHpcClimate::setup() {
+  waterTemperature_->set_icon("mdi:thermometer");
+  waterTemperature_->set_unit_of_measurement("°C");
+  waterTemperature_->set_accuracy_decimals(1);
+}
+
 void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {}
 
-void DaikinHpcClimate::update() {}
+void DaikinHpcClimate::update() { waterTemperature_->publish_state(2); }
 
 void DaikinHpcClimate::dump_config() {
   ESP_LOGCONFIG(TAG, "DaikinHpcClimate:");

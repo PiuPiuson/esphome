@@ -22,4 +22,4 @@ async def to_code(config):
     await cg.register_component(var, config)
     await modbus.register_modbus_device(var, config)
 
-    cg.add(var.set_my_required_key(config[CONF_USE_FAHRENHEIT]))
+    cg.add(var.set_fahrenheit(config[CONF_USE_FAHRENHEIT]))

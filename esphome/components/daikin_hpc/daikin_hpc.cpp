@@ -1,4 +1,5 @@
 #include "daikin_hpc.h"
+
 #include "esphome/core/log.h"
 
 namespace esphome {

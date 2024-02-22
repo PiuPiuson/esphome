@@ -6,6 +6,7 @@
 #include "esphome/components/sensor/sensor.h"
 
 #include <vector>
+#include <queue>
 
 namespace esphome {
 namespace daikin_hpc {
@@ -47,6 +48,10 @@ class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice {
     uint8_t : 2;
     bool onOff : 1;
   };
+
+  std::queue<Register> modbusSendQueue{};
+
+  void readNextRegister();
 };
 
 }  // namespace daikin_hpc

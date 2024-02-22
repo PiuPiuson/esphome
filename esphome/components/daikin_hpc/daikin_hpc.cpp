@@ -24,6 +24,8 @@ void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
     ESP_LOGW(TAG, "0X%02x", d);
   }
 
+  modbusSendQueue.pop();
+  readNextRegister();
   return;
 
   int16_t temp = (static_cast<int16_t>(data[0]) << 8) | data[1];
@@ -31,8 +33,20 @@ void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
 }
 
 void DaikinHpcClimate::update() {
-  this->send(MODBUS_CMD_READ_REGISTER, static_cast<uint16_t>(Register::WaterTemperature), 1);
-  this->send(MODBUS_CMD_READ_REGISTER, static_cast<uint16_t>(Register::AirTemperature), 1);
+  modbusSendQueue.clear();
+
+  modbusSendQueue.push(Register::WaterTemperature);
+  modbusSendQueue.push(Register::AirTemperature);
+
+  readNextRegister();
+}
+
+void DaikinHpcClimate::readNextRegister() {
+  if (modbusSendQueue.empty()) {
+    return;
+  }
+
+  this->send(MODBUS_CMD_READ_REGISTER, static_cast<uint16_t>(modbusSendQueue.front()), 1);
 }
 
 void DaikinHpcClimate::dump_config() {

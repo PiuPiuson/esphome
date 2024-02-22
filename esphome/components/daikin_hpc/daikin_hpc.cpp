@@ -16,7 +16,7 @@ float DaikinHpcClimate::dataToTemperature(const std::vector<uint8_t> &data) {
     return 0;
   }
 
-  return (static_cast<int16_t>(data[0]) << 8) | data[1];
+  return ((static_cast<int16_t>(data[0]) << 8) | data[1]) * 0.1;
 }
 
 void DaikinHpcClimate::setup() {

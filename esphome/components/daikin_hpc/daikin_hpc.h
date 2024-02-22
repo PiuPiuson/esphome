@@ -53,6 +53,8 @@ class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice {
   std::queue<Register> modbusSendQueue{};
 
   void readNextRegister();
+
+  float dataToTemperature(const std::vector<uint8_t> &data
 };
 
 }  // namespace daikin_hpc

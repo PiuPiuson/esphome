@@ -47,7 +47,7 @@ class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice {
     Max = 3,
   };
 
-  struct __attribute__((packed, aligned(1))) ConfigRegister {
+  struct __attribute__((packed, aligned(2))) ConfigRegister {
     FanMode fanMode : 3;
     uint8_t : 1;
     bool lock : 1;

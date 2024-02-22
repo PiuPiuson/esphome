@@ -10,19 +10,13 @@ DaikinBrcClimate = daikin_hpc_ns.class_("DaikinHpcClimate")
 
 CONF_USE_FAHRENHEIT = "use_fahrenheit"
 
-CONFIG_SCHEMA = cv.ENTITY_BASE_SCHEMA.extend (
-    cv.Schema(
-        {
-            cv.GenerateID(): cv.declare_id(DaikinBrcClimate),
-            cv.Optional(CONF_USE_FAHRENHEIT, default=False): cv.boolean,
-        }
-    )
-    .extend(modbus.modbus_device_schema(0x01))
-    .extend(cv.polling_component_schema("10s"))
-)
+CONFIG_SCHEMA = cv.Schema({
+        cv.Optional(CONF_USE_FAHRENHEIT, default=False): cv.boolean,
+}).extend(modbus.modbus_device_schema(0x01))
 
 
-async def to_code(config):
-    var = cg.new_Pvariable(config[CONF_ID])
-    await cg.register_component(var, config)
-    await modbus.register_modbus_device(var, config)
+
+# async def to_code(config):
+#     var = cg.new_Pvariable(config[CONF_ID])
+#     await cg.register_component(var, config)
+#     await modbus.register_modbus_device(var, config)

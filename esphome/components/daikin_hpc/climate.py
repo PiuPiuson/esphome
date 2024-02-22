@@ -1,6 +1,6 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import modbus, climate
+from esphome.components import modbus
 from esphome.const import CONF_ID
 
 AUTO_LOAD = ["modbus"]
@@ -10,11 +10,15 @@ DaikinHpcClimate = daikin_hpc_ns.class_("DaikinHpcClimate")
 
 CONF_USE_FAHRENHEIT = "use_fahrenheit"
 
-CONFIG_SCHEMA = cv.COMPONENT_SCHEMA.extend(
-    {
-        cv.GenerateID(): cv.declare_id(DaikinHpcClimate),
-        cv.Optional(CONF_USE_FAHRENHEIT, default=False): cv.boolean,
-    }
+CONFIG_SCHEMA = (
+    cv.Schema(
+        {
+            cv.GenerateID(): cv.declare_id(DaikinHpcClimate),
+            cv.Optional(CONF_USE_FAHRENHEIT, default=False): cv.boolean,
+        }
+    )
+    .extend(cv.polling_component_schema("10s"))
+    .extend(modbus.modbus_device_schema(0x01))
 )
 
 

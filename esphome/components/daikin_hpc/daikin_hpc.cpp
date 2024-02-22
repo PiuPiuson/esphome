@@ -33,7 +33,9 @@ void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
 }
 
 void DaikinHpcClimate::update() {
-  modbusSendQueue.clear();
+  while (!modbusSendQueue.empty()) {
+    modbusSendQueue.pop();
+  }
 
   modbusSendQueue.push(Register::WaterTemperature);
   modbusSendQueue.push(Register::AirTemperature);

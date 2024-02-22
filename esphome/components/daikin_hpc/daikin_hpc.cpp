@@ -19,9 +19,12 @@ void DaikinHpcClimate::setup() {
 }
 
 void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
-  for (const auto b : data) {
-    ESP_LOGI(TAG, "0x%02X", b);
+  if (data.size() != 2) {
+    ESP_LOGW(TAG, "Received data length != 2");
+    return;
   }
+
+  waterTemperature_->publish_state((int16_t) &data[0] * 0.1);
 }
 
 void DaikinHpcClimate::update() {

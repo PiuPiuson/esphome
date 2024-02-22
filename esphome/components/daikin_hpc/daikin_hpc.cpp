@@ -21,6 +21,15 @@ uint16_t DaikinHpcClimate::dataToUint16(const std::vector<uint8_t> &data) {
 
 inline float DaikinHpcClimate::dataToTemperature(const std::vector<uint8_t> &data) { return dataToUint16(data) * 0.1; }
 
+inline DaikinHpcClimate::ConfigRegister dataToConfigRegister(const std::vector<uint8_t> &data) {
+  const auto raw = dataToUint16(data);
+
+  ConfigRegister config{};
+  memcpy(&config, &raw, 2);
+
+  return config;
+}
+
 void DaikinHpcClimate::setup() {
   waterTemperature_->set_icon("mdi:thermometer-water");
   waterTemperature_->set_unit_of_measurement("°C");
@@ -41,11 +50,11 @@ void DaikinHpcClimate::setup() {
   motorSpeed_->set_name("Fan Speed");
   motorSpeed_->set_entity_category(EntityCategory::ENTITY_CATEGORY_DIAGNOSTIC);
 
-  controlLock_->set_icon("mdi:lock");
-  controlLock_->set_name("Control Lock");
+  // controlLock_->set_icon("mdi:lock");
+  // controlLock_->set_name("Control Lock");
 
-  onOff_->set_icon("mdi:power");
-  onOff_->set_name("On / Off");
+  // onOff_->set_icon("mdi:power");
+  // onOff_->set_name("On / Off");
 }
 
 void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
@@ -61,7 +70,10 @@ void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
     case Register::MotorSpeed:
       motorSpeed_->publish_state(dataToUint16(data));
 
-    case Register::Config:
+    case Register::Config: {
+      auto config = dataToConfigRegister(data);
+      ESP_LOGW(TAG, "Mode: %u | Lock: %u | On / Off: %u", config.fanMode, config.lock, config.onOff);
+    }
     case Register::AbsoluteSetPoint:
     default:
       break;

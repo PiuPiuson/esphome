@@ -45,7 +45,6 @@ void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
       break;
 
     case Register::AirTemperature:
-      int16_t temp = (static_cast<int16_t>(data[0]) << 8) | data[1];
       airTemperature_->publish_state(dataToTemperature(data));
       break;
 

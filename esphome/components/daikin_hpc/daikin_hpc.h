@@ -14,7 +14,7 @@
 namespace esphome {
 namespace daikin_hpc {
 
-class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice, public sensor::Sensor {
+class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice {
  public:
   void setup() override;
   void update() override;

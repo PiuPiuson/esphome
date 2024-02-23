@@ -6,6 +6,8 @@
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/switch/switch.h"
 
+#include "daikin_hpc_switch.h"
+
 #include <vector>
 #include <queue>
 
@@ -29,7 +31,7 @@ class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice {
   sensor::Sensor *motorSpeed_ = new sensor::Sensor();
 
   // switch_::Switch *controlLock_ = new switch_::Switch();
-  // switch_::Switch *onOff_ = new switch_::Switch();
+  DaikinHpcSwitch *onOff_ = new DaikinHpcSwitch();
 
   sensor::Sensor *absoluteSetPoint_ = new sensor::Sensor();
 

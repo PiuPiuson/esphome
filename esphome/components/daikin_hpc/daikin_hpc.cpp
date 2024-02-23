@@ -53,8 +53,8 @@ void DaikinHpcClimate::setup() {
   // controlLock_->set_icon("mdi:lock");
   // controlLock_->set_name("Control Lock");
 
-  // onOff_->set_icon("mdi:power");
-  // onOff_->set_name("On / Off");
+  onOff_->set_icon("mdi:power");
+  onOff_->set_name("On / Off");
 }
 
 void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
@@ -79,8 +79,6 @@ void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
 
     case Register::AbsoluteSetPoint:
       absoluteSetPoint_->publish_state(dataToTemperature(data));
-      break;
-    default:
       break;
   }
 

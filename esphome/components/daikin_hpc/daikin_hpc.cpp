@@ -71,11 +71,12 @@ void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
       motorSpeed_->publish_state(dataToUint16(data));
 
     case Register::Config: {
-      ESP_LOGW(TAG, "0x%02X%02X", data[0], data[1]);
+      ESP_LOGW(TAG, "%u", dataToUint16(data));
       auto config = dataToConfigRegister(data);
       ESP_LOGW(TAG, "Mode: %u | Lock: %u | On / Off: %u | 0x%04X", config.fanMode, config.lock, config.onOff,
                *(uint16_t *) &config);
     } break;
+
     case Register::AbsoluteSetPoint:
     default:
       break;

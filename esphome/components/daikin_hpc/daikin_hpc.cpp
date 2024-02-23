@@ -19,6 +19,11 @@ uint16_t DaikinHpcClimate::dataToUint16(const std::vector<uint8_t> &data) {
   return (static_cast<uint16_t>(data[0]) << 8) | data[1];
 }
 
+void DaikinHpcClimate::set_water_temperature_sensor(sensor::Sensor *waterTemperatureSensor) {
+  ESP_LOGW(TAG, "set water temp");
+  waterTemperatureSensor_ = waterTemperatureSensor;
+}
+
 float DaikinHpcClimate::dataToTemperature(const std::vector<uint8_t> &data) { return dataToUint16(data) * 0.1; }
 
 void DaikinHpcClimate::parseConfigData(const std::vector<uint8_t> &data) {

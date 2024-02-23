@@ -28,7 +28,9 @@ void DaikinHpcClimate::parseConfigData(const std::vector<uint8_t> &data) {
   const bool lock = (raw >> 4) & 0b1;
   const uint8_t fanMode = raw & 0b111;
 
-  onOff_->publish_state(onOff);
+  if (onOff_ != nullptr) {
+    onOff_->publish_state(onOff);
+  }
 }
 
 void DaikinHpcClimate::setup() {
@@ -63,22 +65,31 @@ void DaikinHpcClimate::setup() {
 void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
   switch (modbusSendQueue.front()) {
     case Register::WaterTemperature:
-      waterTemperatureSensor_->publish_state(dataToTemperature(data));
+      if (waterTemperatureSensor_ != nullptr) {
+        waterTemperatureSensor_->publish_state(dataToTemperature(data));
+      }
       break;
 
     case Register::AirTemperature:
-      airTemperatureSensor_->publish_state(dataToTemperature(data));
+      if (airTemperatureSensor_ != nullptr) {
+        airTemperatureSensor_->publish_state(dataToTemperature(data));
+      }
       break;
 
     case Register::MotorSpeed:
-      motorSpeedSensor_->publish_state(dataToUint16(data));
+      if (motorSpeedSensor_ != nullptr) {
+        motorSpeedSensor_->publish_state(dataToUint16(data));
+      }
+      break;
 
     case Register::Config:
       parseConfigData(data);
       break;
 
     case Register::AbsoluteSetPoint:
-      // absoluteSetPointSensor_->publish_state(dataToTemperature(data));
+      if (absoluteSetPointSensor_ != nullptr) {
+        absoluteSetPointSensor_->publish_state(dataToTemperature(data));
+      }
       break;
   }
 

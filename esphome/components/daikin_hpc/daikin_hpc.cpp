@@ -56,6 +56,7 @@ void DaikinHpcClimate::setup() {
 
   onOff_->set_icon("mdi:power");
   onOff_->set_name("On / Off");
+  onOff_->set_inverted(true);
 }
 
 void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
@@ -72,7 +73,7 @@ void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
       motorSpeed_->publish_state(dataToUint16(data));
 
     case Register::Config:
-    case Register::ConfigStatus:
+      parseConfigData(data);
       break;
 
     case Register::AbsoluteSetPoint:

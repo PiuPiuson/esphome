@@ -40,7 +40,6 @@ class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice {
     AirTemperature = 0,
     WaterTemperature = 1,
     MotorSpeed = 9,
-    ConfigStatus = 104,
     Config = 201,
     AbsoluteSetPoint = 231,
   };

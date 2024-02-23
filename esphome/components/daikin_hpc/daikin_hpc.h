@@ -31,6 +31,8 @@ class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice {
   // switch_::Switch *controlLock_ = new switch_::Switch();
   // switch_::Switch *onOff_ = new switch_::Switch();
 
+  sensor::Sensor *absoluteSetPoint_ = new sensor::Sensor();
+
  private:
   enum class Register : uint8_t {
     AirTemperature = 0,

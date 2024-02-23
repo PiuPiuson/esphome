@@ -78,6 +78,8 @@ void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
     } break;
 
     case Register::AbsoluteSetPoint:
+      absoluteSetPoint_->publish_state(dataToTemperature(data));
+      break;
     default:
       break;
   }

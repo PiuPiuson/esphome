@@ -66,7 +66,6 @@ async def to_code(config):
     if voltage_config := config.get(CONF_VOLTAGE):
         sens = await sensor.new_sensor(voltage_config)
         cg.add(var.set_voltage_sensor(sens))
-        await cg.register_component(var, sens)
     if current_config := config.get(CONF_CURRENT):
         sens = await sensor.new_sensor(current_config)
         cg.add(var.set_current_sensor(sens))

@@ -69,6 +69,7 @@ async def to_code(config):
         conf = config[CONF_FAN_SPEED]
         sens = await sensor.new_sensor(conf)
         cg.add(var.set_motor_speed_sensor(sens))
+        await cg.register_component(var, sens)
 
     if CONF_WATER_TEMPERATURE in config:
         conf = config[CONF_WATER_TEMPERATURE]

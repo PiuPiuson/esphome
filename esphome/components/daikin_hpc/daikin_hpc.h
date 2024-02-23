@@ -23,12 +23,16 @@ class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice, p
 
   void dump_config() override;
 
-  void set_water_temperature_sensor(sensor::Sensor *waterTemperatureSensor){
-      waterTemperatureSensor_ = waterTemperatureSensor};
-  void set_air_temperature_sensor(sensor::Sensor *airTemperatureSensor){airTemperatureSensor_ = airTemperatureSensor};
-  void set_motor_speed_sensor(sensor::Sensor *motorSpeedSensor){motorSpeedSensor_ = motorSpeedSensor};
-  void set_absolute_set_point_sensor(sensor::Sensor *absoluteSetPointSensor){
-      absoluteSetPointSensor_ = absoluteSetPointSensor};
+  void set_water_temperature_sensor(sensor::Sensor *waterTemperatureSensor) {
+    waterTemperatureSensor_ = waterTemperatureSensor;
+  }
+  void set_air_temperature_sensor(sensor::Sensor *airTemperatureSensor) {
+    airTemperatureSensor_ = airTemperatureSensor;
+  }
+  void set_motor_speed_sensor(sensor::Sensor *motorSpeedSensor) { motorSpeedSensor_ = motorSpeedSensor; }
+  void set_absolute_set_point_sensor(sensor::Sensor *absoluteSetPointSensor) {
+    absoluteSetPointSensor_ = absoluteSetPointSensor;
+  }
 
  protected:
   DaikinHpcClimate *daikin_hpc_;

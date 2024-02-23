@@ -14,7 +14,7 @@
 namespace esphome {
 namespace daikin_hpc {
 
-class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice {
+class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice, public sensor::Sensor {
  public:
   void setup() override;
   void update() override;
@@ -23,17 +23,24 @@ class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice {
 
   void dump_config() override;
 
+  void set_water_temperature_sensor(sensor::Sensor *waterTemperatureSensor){
+      waterTemperatureSensor_ = waterTemperatureSensor};
+  void set_air_temperature_sensor(sensor::Sensor *airTemperatureSensor){airTemperatureSensor_ = airTemperatureSensor};
+  void set_motor_speed_sensor(sensor::Sensor *motorSpeedSensor){motorSpeedSensor_ = motorSpeedSensor};
+  void set_absolute_set_point_sensor(sensor::Sensor *absoluteSetPointSensor){
+      absoluteSetPointSensor_ = absoluteSetPointSensor};
+
  protected:
   DaikinHpcClimate *daikin_hpc_;
 
-  sensor::Sensor *waterTemperature_ = new sensor::Sensor();
-  sensor::Sensor *airTemperature_ = new sensor::Sensor();
-  sensor::Sensor *motorSpeed_ = new sensor::Sensor();
+  sensor::Sensor *waterTemperatureSensor_{nullptr};
+  sensor::Sensor *airTemperatureSensor_{nullptr};
+  sensor::Sensor *motorSpeedSensor_{nullptr};
 
   // switch_::Switch *controlLock_ = new switch_::Switch();
   DaikinHpcSwitch *onOff_ = new DaikinHpcSwitch();
 
-  sensor::Sensor *absoluteSetPoint_ = new sensor::Sensor();
+  sensor::Sensor *absoluteSetPointSensor_{nullptr};
 
  private:
   enum class Register : uint8_t {

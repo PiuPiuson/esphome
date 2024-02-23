@@ -32,25 +32,25 @@ void DaikinHpcClimate::parseConfigData(const std::vector<uint8_t> &data) {
 }
 
 void DaikinHpcClimate::setup() {
-  waterTemperature_->set_icon("mdi:thermometer-water");
-  waterTemperature_->set_unit_of_measurement("°C");
-  waterTemperature_->set_accuracy_decimals(1);
-  waterTemperature_->set_name("Water Temperature");
-  waterTemperature_->set_entity_category(EntityCategory::ENTITY_CATEGORY_DIAGNOSTIC);
-  waterTemperature_->set_internal(false);
+  // waterTemperatureSensor_->set_icon("mdi:thermometer-water");
+  // waterTemperatureSensor_->set_unit_of_measurement("°C");
+  // waterTemperatureSensor_->set_accuracy_decimals(1);
+  // waterTemperatureSensor_->set_name("Water Temperature");
+  // waterTemperatureSensor_->set_entity_category(EntityCategory::ENTITY_CATEGORY_DIAGNOSTIC);
+  // waterTemperatureSensor_->set_internal(false);
 
-  airTemperature_->set_icon("mdi:thermometer");
-  airTemperature_->set_unit_of_measurement("°C");
-  airTemperature_->set_accuracy_decimals(1);
-  airTemperature_->set_name("Air Temperature");
-  airTemperature_->set_entity_category(EntityCategory::ENTITY_CATEGORY_NONE);
-  airTemperature_->set_internal(false);
+  // airTemperatureSensor_->set_icon("mdi:thermometer");
+  // airTemperatureSensor_->set_unit_of_measurement("°C");
+  // airTemperatureSensor_->set_accuracy_decimals(1);
+  // airTemperatureSensor_->set_name("Air Temperature");
+  // airTemperatureSensor_->set_entity_category(EntityCategory::ENTITY_CATEGORY_NONE);
+  // airTemperatureSensor_->set_internal(false);
 
-  motorSpeed_->set_icon("mdi:fan");
-  motorSpeed_->set_unit_of_measurement("rpm");
-  motorSpeed_->set_accuracy_decimals(0);
-  motorSpeed_->set_name("Fan Speed");
-  motorSpeed_->set_entity_category(EntityCategory::ENTITY_CATEGORY_DIAGNOSTIC);
+  // motorSpeedSensor_->set_icon("mdi:fan");
+  // motorSpeedSensor_->set_unit_of_measurement("rpm");
+  // motorSpeedSensor_->set_accuracy_decimals(0);
+  // motorSpeedSensor_->set_name("Fan Speed");
+  // motorSpeedSensor_->set_entity_category(EntityCategory::ENTITY_CATEGORY_DIAGNOSTIC);
 
   // controlLock_->set_icon("mdi:lock");
   // controlLock_->set_name("Control Lock");
@@ -63,22 +63,22 @@ void DaikinHpcClimate::setup() {
 void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
   switch (modbusSendQueue.front()) {
     case Register::WaterTemperature:
-      waterTemperature_->publish_state(dataToTemperature(data));
+      waterTemperatureSensor_->publish_state(dataToTemperature(data));
       break;
 
     case Register::AirTemperature:
-      airTemperature_->publish_state(dataToTemperature(data));
+      airTemperatureSensor_->publish_state(dataToTemperature(data));
       break;
 
     case Register::MotorSpeed:
-      motorSpeed_->publish_state(dataToUint16(data));
+      motorSpeedSensor_->publish_state(dataToUint16(data));
 
     case Register::Config:
       parseConfigData(data);
       break;
 
     case Register::AbsoluteSetPoint:
-      absoluteSetPoint_->publish_state(dataToTemperature(data));
+      // absoluteSetPointSensor_->publish_state(dataToTemperature(data));
       break;
   }
 

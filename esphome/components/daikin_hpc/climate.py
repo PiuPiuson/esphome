@@ -26,6 +26,13 @@ CONFIG_SCHEMA = (
         {
             cv.GenerateID(): cv.declare_id(DaikinHpcClimate),
             cv.Optional(CONF_NAME): cv.string_strict,
+            cv.Optional(CONF_TEMPERATURE): sensor.sensor_schema(
+                unit_of_measurement=UNIT_CELSIUS,
+                accuracy_decimals=1,
+                device_class=DEVICE_CLASS_TEMPERATURE,
+                state_class=STATE_CLASS_MEASUREMENT,
+                icon="mdi:thermometer"
+            ),
             cv.Optional(CONF_WATER_TEMPERATURE): sensor.sensor_schema(
                 unit_of_measurement=UNIT_CELSIUS,
                 accuracy_decimals=1,
@@ -47,22 +54,16 @@ CONFIG_SCHEMA = (
     .extend(modbus.modbus_device_schema(0x01))
 )
 
-TEMPERATURE_SENSOR_SCHEMA = sensor.sensor_schema(
-    unit_of_measurement=UNIT_CELSIUS,
-    accuracy_decimals=1,
-    device_class=DEVICE_CLASS_TEMPERATURE,
-    state_class=STATE_CLASS_MEASUREMENT,
-    icon="mdi:thermometer"
-),
-
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await modbus.register_modbus_device(var, config)
 
-    sens = await sensor.new_sensor(TEMPERATURE_SENSOR_SCHEMA)
-    cg.add(var.set_air_temperature_sensor(sens))
+    if CONF_TEMPERATURE in config:
+        conf = config[CONF_TEMPERATURE]
+        sens = await sensor.new_sensor(conf)
+        cg.add(var.set_air_temperature_sensor(sens))
 
     if CONF_FAN_SPEED in config:
         conf = config[CONF_FAN_SPEED]

@@ -24,6 +24,7 @@ class DaikinHpcClimate : public PollingComponent, public modbus::ModbusDevice, p
   void dump_config() override;
 
   void set_water_temperature_sensor(sensor::Sensor *waterTemperatureSensor) {
+    ESP_LOGW(TAG, "set water temp");
     waterTemperatureSensor_ = waterTemperatureSensor;
   }
   void set_air_temperature_sensor(sensor::Sensor *airTemperatureSensor) {

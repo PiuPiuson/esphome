@@ -37,6 +37,7 @@ void DaikinHpcClimate::setup() {
   waterTemperature_->set_accuracy_decimals(1);
   waterTemperature_->set_name("Water Temperature");
   waterTemperature_->set_entity_category(EntityCategory::ENTITY_CATEGORY_DIAGNOSTIC);
+  waterTemperature_->set_internal(false);
 
   airTemperature_->set_icon("mdi:thermometer");
   airTemperature_->set_unit_of_measurement("°C");

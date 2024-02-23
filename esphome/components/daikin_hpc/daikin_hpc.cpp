@@ -21,13 +21,14 @@ uint16_t DaikinHpcClimate::dataToUint16(const std::vector<uint8_t> &data) {
 
 float DaikinHpcClimate::dataToTemperature(const std::vector<uint8_t> &data) { return dataToUint16(data) * 0.1; }
 
-DaikinHpcClimate::ConfigRegister DaikinHpcClimate::dataToConfigRegister(const std::vector<uint8_t> &data) {
+void DaikinHpcClimate::parseConfigData(const std::vector<uint8_t> &data) {
   const auto raw = dataToUint16(data);
 
-  ConfigRegister config{};
-  memcpy(&config, &raw, 2);
+  const bool onOff = (raw >> 7) & 0b1;
+  const bool lock = (raw >> 4) & 0b1;
+  const uint8_t fanMode = raw & 0b111;
 
-  return config;
+  onOff_->publish_state(onOff);
 }
 
 void DaikinHpcClimate::setup() {
@@ -70,12 +71,9 @@ void DaikinHpcClimate::on_modbus_data(const std::vector<uint8_t> &data) {
     case Register::MotorSpeed:
       motorSpeed_->publish_state(dataToUint16(data));
 
-    case Register::Config: {
-      ESP_LOGW(TAG, "%u", dataToUint16(data));
-      auto config = dataToConfigRegister(data);
-      ESP_LOGW(TAG, "Mode: %u | Lock: %u | On / Off: %u | 0x%04X", config.fanMode, config.lock, config.onOff,
-               *(uint16_t *) &config);
-    } break;
+    case Register::Config:
+    case Register::ConfigStatus:
+      break;
 
     case Register::AbsoluteSetPoint:
       absoluteSetPoint_->publish_state(dataToTemperature(data));

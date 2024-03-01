@@ -100,6 +100,7 @@ void DaikinAlthermaHPC::process_register_queue(const std::vector<uint8_t> &data)
 
     case Register::AirTemperature:
       this->current_temperature = this->data_to_temperature(data);
+      this->publish_state();
     default:
       break;
   }

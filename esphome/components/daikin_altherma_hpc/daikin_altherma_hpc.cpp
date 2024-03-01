@@ -74,14 +74,14 @@ void DaikinAlthermaHPC::process_flag_data(const std::vector<uint8_t> &data) {
 }
 
 void DaikinAlthermaHPC::on_modbus_data(const std::vector<uint8_t> &data) {
-  if (this->modbus_send_queue.empty()) {
+  if (this->modbus_read_queue.empty()) {
     if (data.size() == 4) {
       auto reg = static_cast<Register>(this->data_to_uint16({data[0], data[1]}));
       auto val = this->data_to_uint16({data[2], data[3]});
       ESP_LOGD(TAG, "Received confirmation register %d value %u (0x%02X%02X)", static_cast<int>(reg), val, data[2],
                data[3]);
 
-      this->modbus_send_queue.push(reg);
+      this->modbus_read_queue.push(reg);
       this->process_register_queue({data[2], data[3]});
     }
 
@@ -91,7 +91,7 @@ void DaikinAlthermaHPC::on_modbus_data(const std::vector<uint8_t> &data) {
 }
 
 void DaikinAlthermaHPC::process_register_queue(const std::vector<uint8_t> &data) {
-  switch (this->modbus_send_queue.front()) {
+  switch (this->modbus_read_queue.front()) {
     case Register::WaterTemperature:
       if (this->water_temperature_sensor_ != nullptr) {
         this->water_temperature_sensor_->publish_state(this->data_to_temperature(data));
@@ -109,26 +109,26 @@ void DaikinAlthermaHPC::process_register_queue(const std::vector<uint8_t> &data)
       break;
   }
 
-  this->modbus_send_queue.pop();
+  this->modbus_read_queue.pop();
   this->read_next_register();
 }
 
 void DaikinAlthermaHPC::update() {
-  this->clear_modbus_send_queue();
+  this->clear_modbus_read_queue();
 
-  this->modbus_send_queue.push(Register::AirTemperature);
-  this->modbus_send_queue.push(Register::WaterTemperature);
-  this->modbus_send_queue.push(Register::SetPoint);
+  this->modbus_read_queue.push(Register::AirTemperature);
+  this->modbus_read_queue.push(Register::WaterTemperature);
+  this->modbus_read_queue.push(Register::SetPoint);
 
   this->read_next_register();
 }
 
 void DaikinAlthermaHPC::read_next_register() {
-  if (this->modbus_send_queue.empty()) {
+  if (this->modbus_read_queue.empty()) {
     return;
   }
 
-  this->send(MODBUS_CMD_READ_REGISTER, static_cast<uint16_t>(this->modbus_send_queue.front()), 1);
+  this->send(MODBUS_CMD_READ_REGISTER, static_cast<uint16_t>(this->modbus_read_queue.front()), 1);
 }
 
 void DaikinAlthermaHPC::modbus_write_bool(DaikinAlthermaHPC::Register reg, bool val) {
@@ -136,7 +136,7 @@ void DaikinAlthermaHPC::modbus_write_bool(DaikinAlthermaHPC::Register reg, bool 
   data[1] = val & 1;
   this->send(MODBUS_CMD_WRITE_REGISTER, static_cast<uint16_t>(reg), 1, 2, data);
 
-  this->clear_modbus_send_queue();
+  this->clear_modbus_read_queue();
 }
 
 void DaikinAlthermaHPC::modbus_write_uint16(DaikinAlthermaHPC::Register reg, uint16_t val) {
@@ -146,7 +146,7 @@ void DaikinAlthermaHPC::modbus_write_uint16(DaikinAlthermaHPC::Register reg, uin
   data[1] = val & 0xFF;
   this->send(MODBUS_CMD_WRITE_REGISTER, static_cast<uint16_t>(reg), 1, 2, data);
 
-  this->clear_modbus_send_queue();
+  this->clear_modbus_read_queue();
 }
 
 climate::ClimateTraits DaikinAlthermaHPC::traits() {
@@ -160,8 +160,8 @@ climate::ClimateTraits DaikinAlthermaHPC::traits() {
       climate::ClimateFanMode::CLIMATE_FAN_AUTO,
       climate::ClimateFanMode::CLIMATE_FAN_HIGH,
       climate::ClimateFanMode::CLIMATE_FAN_LOW,
+      climate::ClimateFanMode::CLIMATE_FAN_QUIET,
   });
-  traits.add_supported_custom_fan_mode("Night");
   return traits;
 }
 
@@ -171,7 +171,19 @@ void DaikinAlthermaHPC::setup() {
   this->set_visual_temperature_step_override(0.1, 0.5);
 }
 
-void DaikinAlthermaHPC::control(const climate::ClimateCall &call) {}
+void DaikinAlthermaHPC::control(const climate::ClimateCall &call) {
+  this->fan_mode = call.get_fan_mode();
+
+  if (call.get_mode().has_value()) {
+    this->mode = call.get_mode().value();
+  }
+
+  if (call.get_target_temperature().has_value()) {
+    this->target_temperature = call.get_target_temperature().value();
+  }
+
+  this->publish_state();
+}
 
 void DaikinAlthermaHPC::toggle_switch(const std::string &id, bool state) {
   if (id == "heater_installed") {
@@ -200,9 +212,9 @@ void DaikinAlthermaHPC::set_select(const std::string &id, const std::string &opt
   }
 }
 
-void DaikinAlthermaHPC::clear_modbus_send_queue() {
-  while (!this->modbus_send_queue.empty()) {
-    this->modbus_send_queue.pop();
+void DaikinAlthermaHPC::clear_modbus_read_queue() {
+  while (!this->modbus_read_queue.empty()) {
+    this->modbus_read_queue.pop();
   }
 }
 

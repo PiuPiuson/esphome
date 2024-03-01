@@ -123,13 +123,14 @@ class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, publ
     Cool = 5,
   };
 
-  std::queue<Register> modbus_send_queue{};
+  std::queue<Register> modbus_read_queue{};
+  std::queue<std::pair<Register, uint16_t>> modbus_write_queue{};
 
   void read_next_register();
   void modbus_write_bool(Register reg, bool val);
   void modbus_write_uint16(Register reg, uint16_t val);
 
-  void clear_modbus_send_queue();
+  void clear_modbus_read_queue();
 
   float data_to_temperature(const std::vector<uint8_t> &data);
   uint16_t data_to_uint16(const std::vector<uint8_t> &data);

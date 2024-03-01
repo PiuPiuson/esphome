@@ -46,6 +46,7 @@ AUTO_LOAD = [
     "climate",
 ]
 
+CONF_WATER_TEMPERATURE = "water_temperature"
 
 daikin_altherma_hpc_ns = cg.esphome_ns.namespace("daikin_altherma_hpc")
 DaikinAlthermaHPC = daikin_altherma_hpc_ns.class_(
@@ -70,8 +71,8 @@ CONFIG_SCHEMA = (
             cv.GenerateID(CONF_ID): cv.declare_id(DaikinAlthermaHPC),
             # ------------ SENSORS --------------
             cv.Optional(
-                CONF_TEMPERATURE,
-                default={CONF_NAME: "Temperature"},
+                CONF_WATER_TEMPERATURE,
+                default={CONF_NAME: "Water Temperature"},
             ): sensor.sensor_schema(
                 accuracy_decimals=1,
                 unit_of_measurement=UNIT_CELSIUS,
@@ -130,10 +131,10 @@ async def to_code(config):
     await climate.register_climate(var, config)
 
     # ------------ SENSORS --------------
-    if CONF_TEMPERATURE in config:
-        conf = config[CONF_TEMPERATURE]
+    if CONF_WATER_TEMPERATURE in config:
+        conf = config[CONF_WATER_TEMPERATURE]
         sens = await sensor.new_sensor(conf)
-        cg.add(var.set_air_temperature_sensor(sens))
+        cg.add(var.set_water_temperature_sensor(sens))
 
     # -------- BINARY SENSORS ----------
     # if CONF_BYPASS_OPEN in config:

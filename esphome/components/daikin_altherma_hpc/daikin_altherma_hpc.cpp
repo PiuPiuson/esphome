@@ -92,12 +92,14 @@ void DaikinAlthermaHPC::on_modbus_data(const std::vector<uint8_t> &data) {
 
 void DaikinAlthermaHPC::process_register_queue(const std::vector<uint8_t> &data) {
   switch (this->modbus_send_queue.front()) {
-    case Register::AirTemperature:
-      if (this->air_temperature_sensor_ != nullptr) {
-        this->air_temperature_sensor_->publish_state(this->data_to_temperature(data));
+    case Register::WaterTemperature:
+      if (this->water_temperature_sensor_ != nullptr) {
+        this->water_temperature_sensor_->publish_state(this->data_to_temperature(data));
       }
       break;
 
+    case Register::AirTemperature:
+      this->current_temperature = this->data_to_temperature(data);
     default:
       break;
   }
@@ -110,6 +112,7 @@ void DaikinAlthermaHPC::update() {
   this->clear_modbus_send_queue();
 
   this->modbus_send_queue.push(Register::AirTemperature);
+  this->modbus_send_queue.push(Register::WaterTemperature);
 
   this->read_next_register();
 }

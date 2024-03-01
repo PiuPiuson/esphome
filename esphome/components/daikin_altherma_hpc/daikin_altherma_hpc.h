@@ -87,7 +87,7 @@ class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, publ
 
   void dump_config() override;
 
-  void set_air_temperature_sensor(sensor::Sensor *sensor) { air_temperature_sensor_ = sensor; }
+  void set_water_temperature_sensor(sensor::Sensor *sensor) { water_temperature_sensor_ = sensor; }
 
   void toggle_switch(const std::string &id, bool state);
   void set_number(const std::string &id, float value);
@@ -106,7 +106,7 @@ class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, publ
 
   void control(const climate::ClimateCall &call) override;
 
-  sensor::Sensor *air_temperature_sensor_{nullptr};
+  sensor::Sensor *water_temperature_sensor_{nullptr};
 
   enum class Register : uint16_t {
     AirTemperature = 0,

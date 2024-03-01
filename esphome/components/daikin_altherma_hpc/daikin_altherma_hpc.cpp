@@ -140,7 +140,7 @@ void DaikinAlthermaHPC::modbus_write_uint16(DaikinAlthermaHPC::Register reg, uin
   this->clear_modbus_send_queue();
 }
 
-void DaikinAlthermaHPC::control(const ClimateCall &call) {}
+void DaikinAlthermaHPC::control(const climate::ClimateCall &call) {}
 
 void DaikinAlthermaHPC::toggle_switch(const std::string &id, bool state) {
   if (id == "heater_installed") {

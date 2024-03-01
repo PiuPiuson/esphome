@@ -104,7 +104,7 @@ class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, publ
     return traits;
   }
 
-  void climate::control(const ClimateCall &call) override;
+  void control(const climate::ClimateCall &call) override;
 
   sensor::Sensor *air_temperature_sensor_{nullptr};
 

@@ -95,6 +95,17 @@ class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, publ
   void set_select(const std::string &id, const std::string &option);
 
  protected:
+  climate::ClimateTraits traits() override {
+    climate::ClimateTraits traits;
+    traits.set_supported_modes({climate::ClimateMode::CLIMATE_MODE_HEAT_COOL, climate::ClimateMode::CLIMATE_MODE_HEAT,
+                                climate::ClimateMode::CLIMATE_MODE_COOL});
+    traits.set_supports_two_point_target_temperature(false);
+    traits.set_supports_target_humidity(false);
+    return traits;
+  }
+
+  void climate::control(const ClimateCall &call) override;
+
   sensor::Sensor *air_temperature_sensor_{nullptr};
 
   enum class Register : uint16_t {

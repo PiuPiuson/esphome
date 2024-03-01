@@ -100,6 +100,9 @@ class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, publ
 
   sensor::Sensor *water_temperature_sensor_{nullptr};
 
+  bool on_off_{};
+  bool lock_{};
+
   enum class Register : uint16_t {
     AirTemperature = 0,
     WaterTemperature = 1,
@@ -138,9 +141,20 @@ class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, publ
 
   void process_flag_data(const std::vector<uint8_t> &data);
 
+  uint16_t generate_config_data();
+  void parse_config_data(uint16_t data);
+
   uint16_t temperature_to_uint16(float temperature);
 
-  void process_register_queue(const std::vector<uint8_t> &data);
+  HeatCoolMode climate_mode_to_heat_cool_mode(climate::ClimateMode mode);
+  climate::ClimateMode heat_cool_mode_to_climate_mode(HeatCoolMode mode);
+
+  FanMode climate_fan_mode_to_fan_mode(climate::ClimateFanMode mode);
+  climate::ClimateFanMode fan_mode_to_climate_fan_mode(FanMode mode);
+
+  void process_read_queue(const std::vector<uint8_t> &data);
+
+  void write_state();
 };
 
 }  // namespace daikin_altherma_hpc

@@ -57,6 +57,84 @@ bool DaikinAlthermaHPC::data_to_bool(const std::vector<uint8_t> &data) { return 
 
 uint16_t DaikinAlthermaHPC::temperature_to_uint16(float temperature) { return temperature * 10; }
 
+uint16_t DaikinAlthermaHPC::generate_config_data() {
+  uint16_t data = 0;
+  if (this->fan_mode.has_value()) {
+    data |= static_cast<uint8_t>(this->climate_fan_mode_to_fan_mode(this->fan_mode.value()));
+  }
+  data |= static_cast<uint16_t>(this->lock_) << 4;
+  data |= static_cast<uint16_t>(this->on_off_) << 7;
+  return data;
+}
+
+void DaikinAlthermaHPC::parse_config_data(uint16_t data) {
+  ESP_LOGW(TAG, "Parsing config data 0x%04X", data);
+  this->on_off_ = (data >> 7) & 0b1;
+  this->lock_ = (data >> 4) & 0b1;
+  this->fan_mode = fan_mode_to_climate_fan_mode(static_cast<FanMode>(data & 0b111));
+}
+
+DaikinAlthermaHPC::HeatCoolMode DaikinAlthermaHPC::climate_mode_to_heat_cool_mode(climate::ClimateMode mode) {
+  switch (mode) {
+    case climate::ClimateMode::CLIMATE_MODE_HEAT_COOL:
+      return HeatCoolMode::Auto;
+    case climate::ClimateMode::CLIMATE_MODE_HEAT:
+      return HeatCoolMode::Heat;
+    case climate::ClimateMode::CLIMATE_MODE_COOL:
+      return HeatCoolMode::Cool;
+    default:
+      ESP_LOGW(TAG, "Tried to convert unsupported ClimateMode (%u) to HeatCoolMode", static_cast<int>(mode));
+      return HeatCoolMode::Auto;
+  }
+}
+
+climate::ClimateMode DaikinAlthermaHPC::heat_cool_mode_to_climate_mode(DaikinAlthermaHPC::HeatCoolMode mode) {
+  switch (mode) {
+    case HeatCoolMode::Auto:
+      return climate::ClimateMode::CLIMATE_MODE_HEAT_COOL;
+    case HeatCoolMode::Heat:
+      return climate::ClimateMode::CLIMATE_MODE_HEAT;
+    case HeatCoolMode::Cool:
+      return climate::ClimateMode::CLIMATE_MODE_COOL;
+    default:
+      ESP_LOGW(TAG, "Tried to convert unsupported HeatCoolMode (%u) to ClimateMode", static_cast<int>(mode));
+      return climate::ClimateMode::CLIMATE_MODE_OFF;
+  }
+}
+
+DaikinAlthermaHPC::FanMode DaikinAlthermaHPC::climate_fan_mode_to_fan_mode(climate::ClimateFanMode mode) {
+  switch (mode) {
+    case climate::ClimateFanMode::CLIMATE_FAN_OFF:
+    case climate::ClimateFanMode::CLIMATE_FAN_AUTO:
+      return FanMode::Auto;
+    case climate::ClimateFanMode::CLIMATE_FAN_LOW:
+      return FanMode::Min;
+    case climate::ClimateFanMode::CLIMATE_FAN_QUIET:
+      return FanMode::Night;
+    case climate::ClimateFanMode::CLIMATE_FAN_HIGH:
+      return FanMode::Max;
+    default:
+      ESP_LOGW(TAG, "Tried to convert unsupported ClimateFanMode (%u) to FanMode", static_cast<int>(mode));
+      return FanMode::Auto;
+  }
+}
+
+climate::ClimateFanMode DaikinAlthermaHPC::fan_mode_to_climate_fan_mode(DaikinAlthermaHPC::FanMode mode) {
+  switch (mode) {
+    case FanMode::Auto:
+      return climate::ClimateFanMode::CLIMATE_FAN_AUTO;
+    case FanMode::Min:
+      return climate::ClimateFanMode::CLIMATE_FAN_LOW;
+    case FanMode::Night:
+      return climate::ClimateFanMode::CLIMATE_FAN_QUIET;
+    case FanMode::Max:
+      return climate::ClimateFanMode::CLIMATE_FAN_HIGH;
+    default:
+      ESP_LOGW(TAG, "Tried to convert unsupported FanMode (%u) to ClimateFanMode", static_cast<int>(mode));
+      return climate::ClimateFanMode::CLIMATE_FAN_AUTO;
+  }
+}
+
 void DaikinAlthermaHPC::process_flag_data(const std::vector<uint8_t> &data) {
   auto dataInt = this->data_to_uint16(data);
 
@@ -82,15 +160,15 @@ void DaikinAlthermaHPC::on_modbus_data(const std::vector<uint8_t> &data) {
                data[3]);
 
       this->modbus_read_queue.push(reg);
-      this->process_register_queue({data[2], data[3]});
+      this->process_read({data[2], data[3]});
     }
 
   } else {
-    this->process_register_queue(data);
+    this->process_read(data);
   }
 }
 
-void DaikinAlthermaHPC::process_register_queue(const std::vector<uint8_t> &data) {
+void DaikinAlthermaHPC::process_read(const std::vector<uint8_t> &data) {
   switch (this->modbus_read_queue.front()) {
     case Register::WaterTemperature:
       if (this->water_temperature_sensor_ != nullptr) {
@@ -104,6 +182,18 @@ void DaikinAlthermaHPC::process_register_queue(const std::vector<uint8_t> &data)
 
     case Register::SetPoint:
       this->target_temperature = this->data_to_temperature(data);
+      this->publish_state();
+
+    case Register::Config:
+      this->parse_config_data(this->data_to_uint16(data));
+      this->publish_state();
+
+    case Register::HeatCoolSelect:
+      if (this->on_off_) {
+        this->mode = this->heat_cool_mode_to_climate_mode(static_cast<HeatCoolMode>(this->data_to_uint16(data)));
+      } else {
+        this->mode = climate::ClimateMode::CLIMATE_MODE_OFF;
+      }
       this->publish_state();
     default:
       break;
@@ -119,6 +209,8 @@ void DaikinAlthermaHPC::update() {
   this->modbus_read_queue.push(Register::AirTemperature);
   this->modbus_read_queue.push(Register::WaterTemperature);
   this->modbus_read_queue.push(Register::SetPoint);
+  this->modbus_read_queue.push(Register::Config);
+  this->modbus_read_queue.push(Register::HeatCoolSelect);
 
   this->read_next_register();
 }
@@ -176,6 +268,7 @@ void DaikinAlthermaHPC::control(const climate::ClimateCall &call) {
 
   if (call.get_mode().has_value()) {
     this->mode = call.get_mode().value();
+    this->on_off_ = call.get_mode().value() != climate::ClimateMode::CLIMATE_MODE_OFF;
   }
 
   if (call.get_target_temperature().has_value()) {
@@ -183,6 +276,22 @@ void DaikinAlthermaHPC::control(const climate::ClimateCall &call) {
   }
 
   this->publish_state();
+  this->write_state();
+}
+
+void DaikinAlthermaHPC::write_state() {
+  this->modbus_write_queue.push({Register::SetPoint, this->temperature_to_uint16(this->target_temperature)});
+
+  auto daikin_mode = this->climate_mode_to_heat_cool_mode(this->mode);
+  this->modbus_write_queue.push({Register::HeatCoolSelect, static_cast<uint16_t>(daikin_mode)});
+
+  if (this->fan_mode.has_value()) {
+    auto new_fan_mode = this->climate_fan_mode_to_fan_mode(this->fan_mode.value());
+    this->modbus_write_queue.push({Register::HeatCoolSelect, static_cast<uint16_t>(new_fan_mode)});
+  }
+
+  auto config_data = this->generate_config_data();
+  this->modbus_write_queue.push({Register::Config, config_data});
 }
 
 void DaikinAlthermaHPC::toggle_switch(const std::string &id, bool state) {

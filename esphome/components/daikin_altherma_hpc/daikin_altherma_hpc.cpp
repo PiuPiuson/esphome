@@ -162,10 +162,10 @@ void DaikinAlthermaHPC::press_button(const std::string &id) {
 
 void DaikinAlthermaHPC::set_select(const std::string &id, const std::string &option) {
   if (id == "filter_alarm_interval") {
-    auto index = this->filter_alarm_interval_select_->index_of(option);
-    if (index.has_value()) {
-      // this->modbus_write_uint16(Register::FilterAlarmTimer, index.value());
-    }
+    // auto index = this->filter_alarm_interval_select_->index_of(option);
+    // if (index.has_value()) {
+    //  this->modbus_write_uint16(Register::FilterAlarmTimer, index.value());
+    // }
   }
 }
 
@@ -178,7 +178,7 @@ void DaikinAlthermaHPC::clear_modbus_send_queue() {
 void DaikinAlthermaHPC::dump_config() {
   ESP_LOGCONFIG(TAG, "DaikinAlthermaHPC:");
   ESP_LOGCONFIG(TAG, "  Address: 0x%02X", this->address_);
-  LOG_FAN(TAG, " Fan", this);
+  LOG_CLIMATE(TAG, " Climate", this);
 }
 
 }  // namespace daikin_altherma_hpc

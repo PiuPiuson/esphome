@@ -80,8 +80,7 @@ class DaikinAlthermaHPCSelect : public select::Select, public Component {
 
 class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, public modbus::ModbusDevice {
  public:
-  void setup() override {}
-
+  void setup() override;
   void update() override;
   void on_modbus_data(const std::vector<uint8_t> &data) override;
 
@@ -95,15 +94,7 @@ class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, publ
   void set_select(const std::string &id, const std::string &option);
 
  protected:
-  climate::ClimateTraits traits() override {
-    climate::ClimateTraits traits;
-    traits.set_supported_modes({climate::ClimateMode::CLIMATE_MODE_HEAT_COOL, climate::ClimateMode::CLIMATE_MODE_HEAT,
-                                climate::ClimateMode::CLIMATE_MODE_COOL, climate::ClimateMode::CLIMATE_MODE_OFF});
-    traits.set_supports_two_point_target_temperature(false);
-    traits.set_supports_target_humidity(false);
-    traits.set_supports_current_temperature(true);
-    return traits;
-  }
+  climate::ClimateTraits traits() override;
 
   void control(const climate::ClimateCall &call) override;
 

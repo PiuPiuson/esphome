@@ -39,7 +39,7 @@ void DaikinAlthermaHPCSelect::control(const std::string &value) {
   this->parent_->set_select(this->id_, value);
 }
 
-/****************** HRU *****************/
+/****************** CLIMATE *****************/
 uint16_t DaikinAlthermaHPC::data_to_uint16(const std::vector<uint8_t> &data) {
   if (data.size() != 2) {
     ESP_LOGW(TAG, "Tried to convert invalid data to unt16");
@@ -147,6 +147,22 @@ void DaikinAlthermaHPC::modbus_write_uint16(DaikinAlthermaHPC::Register reg, uin
   this->send(MODBUS_CMD_WRITE_REGISTER, static_cast<uint16_t>(reg), 1, 2, data);
 
   this->clear_modbus_send_queue();
+}
+
+climate::ClimateTraits DaikinAlthermaHPC::traits() {
+  climate::ClimateTraits traits;
+  traits.set_supported_modes({climate::ClimateMode::CLIMATE_MODE_HEAT_COOL, climate::ClimateMode::CLIMATE_MODE_HEAT,
+                              climate::ClimateMode::CLIMATE_MODE_COOL, climate::ClimateMode::CLIMATE_MODE_OFF});
+  traits.set_supports_two_point_target_temperature(false);
+  traits.set_supports_target_humidity(false);
+  traits.set_supports_current_temperature(true);
+  return traits;
+}
+
+void DaikinAlthermaHPC::setup() {
+  this->set_visual_max_temperature_override(30);
+  this->set_visual_min_temperature_override(16);
+  this->set_visual_temperature_step_override(0.1, 0.5);
 }
 
 void DaikinAlthermaHPC::control(const climate::ClimateCall &call) {}

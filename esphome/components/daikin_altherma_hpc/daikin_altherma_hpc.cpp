@@ -156,6 +156,12 @@ climate::ClimateTraits DaikinAlthermaHPC::traits() {
   traits.set_supports_two_point_target_temperature(false);
   traits.set_supports_target_humidity(false);
   traits.set_supports_current_temperature(true);
+  traits.set_supported_fan_modes({
+      climate::ClimateFanMode::CLIMATE_FAN_AUTO,
+      climate::ClimateFanMode::CLIMATE_FAN_HIGH,
+      climate::ClimateFanMode::CLIMATE_FAN_LOW,
+  });
+  traits.add_supported_custom_fan_mode("Night");
   return traits;
 }
 

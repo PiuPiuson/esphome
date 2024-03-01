@@ -79,6 +79,7 @@ CONFIG_SCHEMA = (
                 device_class=DEVICE_CLASS_TEMPERATURE,
                 state_class=STATE_CLASS_MEASUREMENT,
                 icon=ICON_THERMOMETER,
+                entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
             ),
             # -------- BINARY SENSORS ----------
             # cv.Optional(

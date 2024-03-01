@@ -101,6 +101,10 @@ void DaikinAlthermaHPC::process_register_queue(const std::vector<uint8_t> &data)
     case Register::AirTemperature:
       this->current_temperature = this->data_to_temperature(data);
       this->publish_state();
+
+    case Register::SetPoint:
+      this->target_temperature = this->data_to_temperature(data);
+      this->publish_state();
     default:
       break;
   }
@@ -114,6 +118,7 @@ void DaikinAlthermaHPC::update() {
 
   this->modbus_send_queue.push(Register::AirTemperature);
   this->modbus_send_queue.push(Register::WaterTemperature);
+  this->modbus_send_queue.push(Register::SetPoint);
 
   this->read_next_register();
 }

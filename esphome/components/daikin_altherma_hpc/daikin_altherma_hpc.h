@@ -114,7 +114,7 @@ class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, publ
     WaterTemperature = 1,
     MotorSpeed = 9,
     Config = 201,
-    AbsoluteSetPoint = 231,
+    SetPoint = 231,
     HeatCoolSelect = 233,
     AirTemperatureOffset = 242,
   };

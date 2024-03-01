@@ -16,7 +16,6 @@ from esphome.const import (
     CONF_TEMPERATURE,
     CONF_CO2,
     CONF_SPEED_COUNT,
-    CONF_EXTERNAL_TEMPERATURE,
     UNIT_CELSIUS,
     UNIT_PARTS_PER_MILLION,
     UNIT_MINUTE,
@@ -48,20 +47,20 @@ AUTO_LOAD = [
 ]
 
 
-air_technic_hru_ns = cg.esphome_ns.namespace("air_technic_hru")
-DaikinAlthermaHPC = air_technic_hru_ns.class_(
+daikin_altherma_hpc_ns = cg.esphome_ns.namespace("daikin_altherma_hpc")
+DaikinAlthermaHPC = daikin_altherma_hpc_ns.class_(
     "DaikinAlthermaHPC", climate.Climate, cg.PollingComponent, modbus.ModbusDevice
 )
-DaikinAlthermaHPCSwitch = air_technic_hru_ns.class_(
+DaikinAlthermaHPCSwitch = daikin_altherma_hpc_ns.class_(
     "DaikinAlthermaHPCSwitch", switch.Switch, cg.Component
 )
-DaikinAlthermaHPCNumber = air_technic_hru_ns.class_(
+DaikinAlthermaHPCNumber = daikin_altherma_hpc_ns.class_(
     "DaikinAlthermaHPCNumber", number.Number, cg.Component
 )
-DaikinAlthermaHPCButton = air_technic_hru_ns.class_(
+DaikinAlthermaHPCButton = daikin_altherma_hpc_ns.class_(
     "DaikinAlthermaHPCButton", button.Button, cg.Component
 )
-DaikinAlthermaHPCSelect = air_technic_hru_ns.class_(
+DaikinAlthermaHPCSelect = daikin_altherma_hpc_ns.class_(
     "DaikinAlthermaHPCSelect", select.Select, cg.Component
 )
 

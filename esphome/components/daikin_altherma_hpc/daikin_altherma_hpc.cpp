@@ -26,19 +26,6 @@ void DaikinAlthermaHPCNumber::control(float value) {
   this->parent_->set_number(this->id_, value);
 }
 
-/****************** BUTTON *****************/
-void DaikinAlthermaHPCButton::dump_config() { LOG_BUTTON(TAG, " Button", this); }
-
-void DaikinAlthermaHPCButton::press_action() { this->parent_->press_button(this->id_); }
-
-/****************** SELECT ****************/
-void DaikinAlthermaHPCSelect::dump_config() { LOG_SELECT(TAG, " Select", this); }
-
-void DaikinAlthermaHPCSelect::control(const std::string &value) {
-  this->publish_state(value);
-  this->parent_->set_select(this->id_, value);
-}
-
 /****************** CLIMATE *****************/
 int16_t DaikinAlthermaHPC::data_to_int16(const std::vector<uint8_t> &data) {
   if (data.size() != 2) {

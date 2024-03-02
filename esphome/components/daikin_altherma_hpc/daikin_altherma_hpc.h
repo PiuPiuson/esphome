@@ -5,9 +5,6 @@
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/number/number.h"
 #include "esphome/components/switch/switch.h"
-#include "esphome/components/binary_sensor/binary_sensor.h"
-#include "esphome/components/button/button.h"
-#include "esphome/components/select/select.h"
 #include "esphome/components/climate/climate.h"
 
 #include <vector>
@@ -44,36 +41,6 @@ class DaikinAlthermaHPCNumber : public number::Number, public Component {
 
  protected:
   void control(float value) override;
-
-  DaikinAlthermaHPC *parent_;
-  std::string id_;
-};
-
-class DaikinAlthermaHPCButton : public button::Button, public Component {
- public:
-  void setup() override {}
-  void dump_config() override;
-
-  void set_parent(DaikinAlthermaHPC *parent) { this->parent_ = parent; }
-  void set_id(const char *id) { this->id_ = id; }
-
- protected:
-  void press_action() override;
-
-  DaikinAlthermaHPC *parent_;
-  std::string id_;
-};
-
-class DaikinAlthermaHPCSelect : public select::Select, public Component {
- public:
-  void setup() override {}
-  void dump_config() override;
-
-  void set_parent(DaikinAlthermaHPC *parent) { this->parent_ = parent; }
-  void set_id(const char *id) { this->id_ = id; }
-
- protected:
-  void control(const std::string &value) override;
 
   DaikinAlthermaHPC *parent_;
   std::string id_;

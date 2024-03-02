@@ -90,6 +90,8 @@ class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, publ
 
   void set_lock_controls_switch(DaikinAlthermaHPCSwitch *sw) { this->lock_controls_switch_ = sw; }
 
+  void set_air_temperature_offset_number(DaikinAlthermaHPCNumber *num) { this->air_temperature_offset_numer_ = num; }
+
   void toggle_switch(const std::string &id, bool state);
   void set_number(const std::string &id, float value);
   void press_button(const std::string &id);
@@ -103,6 +105,8 @@ class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, publ
   sensor::Sensor *water_temperature_sensor_{nullptr};
 
   DaikinAlthermaHPCSwitch *lock_controls_switch_{nullptr};
+
+  DaikinAlthermaHPCNumber *air_temperature_offset_numer_{nullptr};
 
   bool standby_{};
   bool lock_controls_{};
@@ -134,19 +138,19 @@ class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, publ
   std::queue<std::pair<Register, uint16_t>> modbus_write_queue_{};
 
   void modbus_write_bool(Register reg, bool val);
-  void modbus_write_uint16(Register reg, uint16_t val);
+  void modbus_write_int16(Register reg, int16_t val);
 
   void clear_modbus_read_queue();
   void clear_modbus_write_queue();
 
   float data_to_temperature(const std::vector<uint8_t> &data);
-  uint16_t data_to_uint16(const std::vector<uint8_t> &data);
+  int16_t data_to_int16(const std::vector<uint8_t> &data);
   bool data_to_bool(const std::vector<uint8_t> &data);
 
   uint16_t generate_config_data();
   void parse_config_data(uint16_t data);
 
-  uint16_t temperature_to_uint16(float temperature);
+  int16_t temperature_to_int16(float temperature);
 
   HeatCoolMode climate_mode_to_heat_cool_mode(climate::ClimateMode mode);
   climate::ClimateMode heat_cool_mode_to_climate_mode(HeatCoolMode mode);

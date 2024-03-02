@@ -47,6 +47,7 @@ AUTO_LOAD = [
     "climate",
 ]
 
+CONF_AIR_TEMPERATURE_OFFSET = "air_temperature_offset"
 CONF_WATER_TEMPERATURE = "water_temperature"
 CONF_LOCK_CONTROLS = "lock_controls"
 
@@ -80,7 +81,7 @@ CONFIG_SCHEMA = (
                 unit_of_measurement=UNIT_CELSIUS,
                 device_class=DEVICE_CLASS_TEMPERATURE,
                 state_class=STATE_CLASS_MEASUREMENT,
-                icon=ICON_THERMOMETER,
+                icon="mdi:thermometer-water",
                 entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
             ),
             # -------- BINARY SENSORS ----------
@@ -102,15 +103,16 @@ CONFIG_SCHEMA = (
                 cv.COMPONENT_SCHEMA
             ),
             # ------------ NUMBERS --------------
-            # cv.Optional(
-            #     CONF_SUPPLY_EXHAUST_RATIO,
-            #     default={CONF_NAME: "Supply / Exhaust Ratio"},
-            # ): number.number_schema(
-            #     DaikinAlthermaHPCNumber,
-            #     entity_category=ENTITY_CATEGORY_CONFIG,
-            # ).extend(
-            #     cv.COMPONENT_SCHEMA
-            # ),
+            cv.Optional(
+                CONF_AIR_TEMPERATURE_OFFSET,
+                default={CONF_NAME: "Air Temperature Offset"},
+            ): number.number_schema(
+                DaikinAlthermaHPCNumber,
+                entity_category=ENTITY_CATEGORY_CONFIG,
+                icon=ICON_THERMOMETER,
+            ).extend(
+                cv.COMPONENT_SCHEMA
+            ),
             # ------------ BUTTONS --------------
             # cv.Optional(
             #     CONF_RESET_FILTER_HOURS, default={CONF_NAME: "Reset Filter Hours"}
@@ -164,13 +166,13 @@ async def to_code(config):
 
     # ------------ NUMBERS --------------
 
-    # if CONF_DEFROST_START_TEMPERATURE in config:
-    #     conf = config[CONF_DEFROST_START_TEMPERATURE]
-    #     num = await number.new_number(conf, min_value=-9, max_value=5, step=1)
-    #     await cg.register_component(num, conf)
-    #     cg.add(num.set_parent(var))
-    #     cg.add(num.set_id(CONF_DEFROST_START_TEMPERATURE))
-    #     cg.add(var.set_defrost_start_temperature_number(num))
+    if CONF_AIR_TEMPERATURE_OFFSET in config:
+        conf = config[CONF_AIR_TEMPERATURE_OFFSET]
+        num = await number.new_number(conf, min_value=-12, max_value=12, step=0.1)
+        await cg.register_component(num, conf)
+        cg.add(num.set_parent(var))
+        cg.add(num.set_id(CONF_AIR_TEMPERATURE_OFFSET))
+        cg.add(var.set_air_temperature_offset_number(num))
 
     # ------------ BUTTONS --------------
     # if CONF_RESET_FILTER_HOURS in config:

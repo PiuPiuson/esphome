@@ -155,7 +155,9 @@ void DaikinAlthermaHPC::on_modbus_data(const std::vector<uint8_t> &data) {
   auto reg = static_cast<Register>(this->data_to_int16({data[0], data[1]}));
   auto val = this->data_to_int16({data[2], data[3]});
 
-  this->modbus_write_queue_.pop();
+  if (this->modbus_write_map_.count(reg) != 0) {
+    this->modbus_write_map_.erase(reg);
+  }
 
   this->clear_modbus_read_queue();
   this->modbus_read_queue_.push(reg);
@@ -219,7 +221,7 @@ void DaikinAlthermaHPC::process_read_queue(const std::vector<uint8_t> &data) {
 void DaikinAlthermaHPC::update() {
   this->clear_modbus_read_queue();
 
-  if (!this->modbus_write_queue_.empty()) {
+  if (!this->modbus_write_map_.empty()) {
     this->write_next_queue_item();
     return;
   }
@@ -244,11 +246,11 @@ void DaikinAlthermaHPC::read_next_queue_item() {
 }
 
 void DaikinAlthermaHPC::write_next_queue_item() {
-  if (this->modbus_write_queue_.empty()) {
+  if (this->modbus_write_map_.empty()) {
     return;
   }
 
-  auto [reg, value] = modbus_write_queue_.front();
+  auto [reg, value] = *modbus_write_map_.begin();
   this->modbus_write_int16(reg, value);
 }
 
@@ -309,18 +311,17 @@ void DaikinAlthermaHPC::control(const climate::ClimateCall &call) {
 }
 
 void DaikinAlthermaHPC::write_state() {
-  this->clear_modbus_write_queue();
   this->clear_modbus_read_queue();
 
   if (this->mode != climate::ClimateMode::CLIMATE_MODE_OFF) {
     auto daikin_mode = this->climate_mode_to_heat_cool_mode(this->mode);
-    this->modbus_write_queue_.push({Register::HeatCoolSelect, static_cast<uint16_t>(daikin_mode)});
+    this->modbus_write_map_[Register::HeatCoolSelect] = static_cast<uint16_t>(daikin_mode);
   }
 
   auto config_data = this->generate_config_data();
-  this->modbus_write_queue_.push({Register::Config, config_data});
+  this->modbus_write_map_[Register::Config] = config_data;
 
-  this->modbus_write_queue_.push({Register::SetPoint, this->temperature_to_int16(this->target_temperature)});
+  this->modbus_write_map_[Register::SetPoint] = this->temperature_to_int16(this->target_temperature);
 
   this->write_next_queue_item();
 }
@@ -337,7 +338,7 @@ void DaikinAlthermaHPC::toggle_switch(const std::string &id, bool state) {
 
 void DaikinAlthermaHPC::set_number(const std::string &id, float value) {
   if (id == "air_temperature_offset") {
-    this->modbus_write_queue_.push({Register::AirTemperatureOffset, this->temperature_to_int16(value)});
+    this->modbus_write_map_[Register::AirTemperatureOffset] = this->temperature_to_int16(value);
   }
 }
 
@@ -359,12 +360,6 @@ void DaikinAlthermaHPC::set_select(const std::string &id, const std::string &opt
 void DaikinAlthermaHPC::clear_modbus_read_queue() {
   while (!this->modbus_read_queue_.empty()) {
     this->modbus_read_queue_.pop();
-  }
-}
-
-void DaikinAlthermaHPC::clear_modbus_write_queue() {
-  while (!this->modbus_write_queue_.empty()) {
-    this->modbus_write_queue_.pop();
   }
 }
 

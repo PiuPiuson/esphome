@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <queue>
+#include <unordered_map>
 
 namespace esphome {
 namespace daikin_altherma_hpc {
@@ -137,13 +138,12 @@ class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, publ
   };
 
   std::queue<Register> modbus_read_queue_{};
-  std::queue<std::pair<Register, uint16_t>> modbus_write_queue_{};
+  std::unordered_map<Register, uint16_t> modbus_write_map_{};
 
   void modbus_write_bool(Register reg, bool val);
   void modbus_write_int16(Register reg, int16_t val);
 
   void clear_modbus_read_queue();
-  void clear_modbus_write_queue();
 
   float data_to_temperature(const std::vector<uint8_t> &data);
   int16_t data_to_int16(const std::vector<uint8_t> &data);

@@ -87,6 +87,7 @@ class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, publ
   void dump_config() override;
 
   void set_water_temperature_sensor(sensor::Sensor *sensor) { this->water_temperature_sensor_ = sensor; }
+  void set_fan_speed_sensor(sensor::Sensor *sensor) { this->fan_speed_sensor_ = sensor; }
 
   void set_lock_controls_switch(DaikinAlthermaHPCSwitch *sw) { this->lock_controls_switch_ = sw; }
 
@@ -103,6 +104,7 @@ class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, publ
   void control(const climate::ClimateCall &call) override;
 
   sensor::Sensor *water_temperature_sensor_{nullptr};
+  sensor::Sensor *fan_speed_sensor_{nullptr};
 
   DaikinAlthermaHPCSwitch *lock_controls_switch_{nullptr};
 
@@ -114,7 +116,7 @@ class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, publ
   enum class Register : uint16_t {
     AirTemperature = 0,
     WaterTemperature = 1,
-    MotorSpeed = 9,
+    FanSpeed = 9,
     Config = 201,
     SetPoint = 231,
     HeatCoolSelect = 233,

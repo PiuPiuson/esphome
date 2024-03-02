@@ -50,6 +50,7 @@ AUTO_LOAD = [
 CONF_AIR_TEMPERATURE_OFFSET = "air_temperature_offset"
 CONF_WATER_TEMPERATURE = "water_temperature"
 CONF_LOCK_CONTROLS = "lock_controls"
+CONF_FAN_SPEED = "motor_speed"
 
 daikin_altherma_hpc_ns = cg.esphome_ns.namespace("daikin_altherma_hpc")
 DaikinAlthermaHPC = daikin_altherma_hpc_ns.class_(
@@ -82,6 +83,16 @@ CONFIG_SCHEMA = (
                 device_class=DEVICE_CLASS_TEMPERATURE,
                 state_class=STATE_CLASS_MEASUREMENT,
                 icon="mdi:thermometer-water",
+                entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
+            ),
+            cv.Optional(
+                CONF_FAN_SPEED,
+                default={CONF_NAME: "Fan Speed"},
+            ): sensor.sensor_schema(
+                accuracy_decimals=0,
+                device_class=DEVICE_CLASS_SPEED,
+                state_class=STATE_CLASS_MEASUREMENT,
+                icon=ICON_FAN,
                 entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
             ),
             # -------- BINARY SENSORS ----------
@@ -147,6 +158,11 @@ async def to_code(config):
         conf = config[CONF_WATER_TEMPERATURE]
         sens = await sensor.new_sensor(conf)
         cg.add(var.set_water_temperature_sensor(sens))
+
+    if CONF_FAN_SPEED in config:
+        conf = config[CONF_FAN_SPEED]
+        sens = await sensor.new_sensor(conf)
+        cg.add(var.set_fan_speed_sensor(sens))
 
     # -------- BINARY SENSORS ----------
     # if CONF_BYPASS_OPEN in config:

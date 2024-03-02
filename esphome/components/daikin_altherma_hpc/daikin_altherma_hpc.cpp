@@ -186,6 +186,12 @@ void DaikinAlthermaHPC::process_read_queue(const std::vector<uint8_t> &data) {
       }
       break;
 
+    case Register::FanSpeed:
+      if (this->fan_speed_sensor_ != nullptr) {
+        this->fan_speed_sensor_->publish_state(this->data_to_int16(data));
+      }
+      break;
+
     case Register::SetPoint:
       this->target_temperature = this->data_to_temperature(data);
       break;
@@ -220,6 +226,7 @@ void DaikinAlthermaHPC::update() {
 
   this->modbus_read_queue_.push(Register::AirTemperature);
   this->modbus_read_queue_.push(Register::WaterTemperature);
+  this->modbus_read_queue_.push(Register::FanSpeed);
   this->modbus_read_queue_.push(Register::AirTemperatureOffset);
   this->modbus_read_queue_.push(Register::SetPoint);
   this->modbus_read_queue_.push(Register::Config);

@@ -1,38 +1,39 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import (
-    modbus,
-    sensor,
-    number,
-    switch,
     binary_sensor,
     button,
-    select,
     climate,
+    modbus,
+    number,
+    select,
+    sensor,
+    switch,
 )
 from esphome.const import (
+    CONF_CO2,
     CONF_ID,
     CONF_NAME,
-    CONF_TEMPERATURE,
-    CONF_CO2,
     CONF_SPEED_COUNT,
-    UNIT_CELSIUS,
-    UNIT_PARTS_PER_MILLION,
-    UNIT_MINUTE,
-    UNIT_HOUR,
-    DEVICE_CLASS_TEMPERATURE,
-    DEVICE_CLASS_DURATION,
+    CONF_TEMPERATURE,
     DEVICE_CLASS_CARBON_DIOXIDE,
-    DEVICE_CLASS_SPEED,
+    DEVICE_CLASS_DURATION,
+    DEVICE_CLASS_LOCK,
     DEVICE_CLASS_OPENING,
     DEVICE_CLASS_SAFETY,
-    STATE_CLASS_MEASUREMENT,
-    ICON_THERMOMETER,
-    ICON_FAN,
-    ICON_TIMER,
-    ICON_MOLECULE_CO2,
+    DEVICE_CLASS_SPEED,
+    DEVICE_CLASS_TEMPERATURE,
     ENTITY_CATEGORY_CONFIG,
     ENTITY_CATEGORY_DIAGNOSTIC,
+    ICON_FAN,
+    ICON_MOLECULE_CO2,
+    ICON_THERMOMETER,
+    ICON_TIMER,
+    STATE_CLASS_MEASUREMENT,
+    UNIT_CELSIUS,
+    UNIT_HOUR,
+    UNIT_MINUTE,
+    UNIT_PARTS_PER_MILLION,
 )
 
 AUTO_LOAD = [
@@ -47,6 +48,7 @@ AUTO_LOAD = [
 ]
 
 CONF_WATER_TEMPERATURE = "water_temperature"
+CONF_LOCK_CONTROLS = "lock_controls"
 
 daikin_altherma_hpc_ns = cg.esphome_ns.namespace("daikin_altherma_hpc")
 DaikinAlthermaHPC = daikin_altherma_hpc_ns.class_(
@@ -83,15 +85,22 @@ CONFIG_SCHEMA = (
             ),
             # -------- BINARY SENSORS ----------
             # cv.Optional(
-            #     CONF_BYPASS_OPEN, default={CONF_NAME: "Bypass"}
+            #     CONF_LOCK_CONTROLS, default={CONF_NAME: "Lock Controls"}
             # ): binary_sensor.binary_sensor_schema(
-            #     device_class=DEVICE_CLASS_OPENING,
-            #     entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
+            #     device_class=DEVICE_CLASS_LOCK,
+            #     entity_category=ENTITY_CATEGORY_CONFIG,
+            #     icon="mdi:lock",
             # ),
             # ----------- SWITCHES -------------
-            # cv.Optional(CONF_HEATER_INSTALLED): switch.switch_schema(
-            #     DaikinAlthermaHPCSwitch, entity_category=ENTITY_CATEGORY_CONFIG
-            # ).extend(cv.COMPONENT_SCHEMA),
+            cv.Optional(
+                CONF_LOCK_CONTROLS, default={CONF_NAME: "Lock Controls"}
+            ): switch.switch_schema(
+                DaikinAlthermaHPCSwitch,
+                entity_category=ENTITY_CATEGORY_CONFIG,
+                icon="mdi:lock",
+            ).extend(
+                cv.COMPONENT_SCHEMA
+            ),
             # ------------ NUMBERS --------------
             # cv.Optional(
             #     CONF_SUPPLY_EXHAUST_RATIO,
@@ -145,13 +154,13 @@ async def to_code(config):
 
     # ----------- SWITCHES -------------
 
-    # if CONF_START_AFTER_POWER_LOSS in config:
-    #     conf = config[CONF_START_AFTER_POWER_LOSS]
-    #     sw = await switch.new_switch(conf)
-    #     await cg.register_component(sw, conf)
-    #     cg.add(sw.set_parent(var))
-    #     cg.add(sw.set_id(CONF_START_AFTER_POWER_LOSS))
-    #     cg.add(var.set_power_restore_switch(sw))
+    if CONF_LOCK_CONTROLS in config:
+        conf = config[CONF_LOCK_CONTROLS]
+        sw = await switch.new_switch(conf)
+        await cg.register_component(sw, conf)
+        cg.add(sw.set_parent(var))
+        cg.add(sw.set_id(CONF_LOCK_CONTROLS))
+        cg.add(var.set_lock_controls_switch(sw))
 
     # ------------ NUMBERS --------------
 

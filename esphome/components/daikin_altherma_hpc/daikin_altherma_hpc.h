@@ -100,7 +100,7 @@ class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, publ
 
   sensor::Sensor *water_temperature_sensor_{nullptr};
 
-  bool on_off_{};
+  bool standby_{};
   bool lock_{};
 
   enum class Register : uint16_t {
@@ -126,20 +126,18 @@ class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, publ
     Cool = 5,
   };
 
-  std::queue<Register> modbus_read_queue{};
-  std::queue<std::pair<Register, uint16_t>> modbus_write_queue{};
+  std::queue<Register> modbus_read_queue_{};
+  std::queue<std::pair<Register, uint16_t>> modbus_write_queue_{};
 
-  void read_next_register();
   void modbus_write_bool(Register reg, bool val);
   void modbus_write_uint16(Register reg, uint16_t val);
 
   void clear_modbus_read_queue();
+  void clear_modbus_write_queue();
 
   float data_to_temperature(const std::vector<uint8_t> &data);
   uint16_t data_to_uint16(const std::vector<uint8_t> &data);
   bool data_to_bool(const std::vector<uint8_t> &data);
-
-  void process_flag_data(const std::vector<uint8_t> &data);
 
   uint16_t generate_config_data();
   void parse_config_data(uint16_t data);
@@ -153,6 +151,9 @@ class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, publ
   climate::ClimateFanMode fan_mode_to_climate_fan_mode(FanMode mode);
 
   void process_read_queue(const std::vector<uint8_t> &data);
+  void read_next_queue_item();
+
+  void write_next_queue_item();
 
   void write_state();
 };

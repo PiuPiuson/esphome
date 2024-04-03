@@ -14,12 +14,12 @@ void SomfyProtocol::_build_frame(uint8_t *frame, SomfyData data) {
   this->_rolling_code += 1;
 
   ESP_LOGD(TAG, "Creating frame for address %08X command %01X and rolling code %d", data.address, data.command,
-           this->_rolling_code);
+           data.code);
 
-  frame[0] = 0xA7;                      // Encryption key. Doesn't matter much
+  frame[0] = 0xA0 | (data.code & 0xF);  // Encryption key with counter
   frame[1] = button << 4;               // Which button did  you press? The 4 LSB will be the checksum
-  frame[2] = this->_rolling_code >> 8;  // Rolling code (big endian)
-  frame[3] = this->_rolling_code;       // Rolling code
+  frame[2] = data.code >> 8;            // Rolling code (big endian)
+  frame[3] = data.code;                 // Rolling code
   frame[4] = data.address >> 16;        // Remote address
   frame[5] = data.address >> 8;         // Remote address
   frame[6] = data.address;              // Remote address
@@ -38,6 +38,9 @@ void SomfyProtocol::_build_frame(uint8_t *frame, SomfyData data) {
   for (uint8_t i = 1; i < 7; i++) {
     frame[i] ^= frame[i - 1];
   }
+
+  ESP_LOGD(TAG, "Frame: 0x%02X%02X%02X%02X%02X%02X%02X", frame[0], frame[1], frame[2], frame[3], frame[4], frame[5],
+           frame[6]);
 }
 
 void SomfyProtocol::_send_frame(RemoteTransmitData *dst, uint8_t *frame, uint8_t sync) {

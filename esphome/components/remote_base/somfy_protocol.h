@@ -1,6 +1,7 @@
 #pragma once
 
 #include "esphome/core/component.h"
+
 #include "remote_base.h"
 
 #include <cinttypes>
@@ -23,8 +24,9 @@ enum class SomfyCommand : uint8_t {
 struct SomfyData {
   SomfyCommand command;
   uint32_t address;
+  uint16_t code;
 
-  bool operator==(const SomfyData &rhs) const { return command == rhs.command; }
+  bool operator==(const SomfyData &rhs) const { return command == rhs.command && address == rhs.address; }
 };
 
 class SomfyProtocol : public RemoteProtocol<SomfyData> {
@@ -46,10 +48,12 @@ template<typename... Ts> class SomfyAction : public RemoteTransmitterActionBase<
  public:
   TEMPLATABLE_VALUE(uint32_t, address)
   TEMPLATABLE_VALUE(uint8_t, command)
+  TEMPLATABLE_VALUE(uint16_t, code)
 
   void encode(RemoteTransmitData *dst, Ts... x) override {
     SomfyData data{};
     data.address = this->address_.value(x...);
+    data.code = this->code_.value(x...);
     data.command = static_cast<SomfyCommand>(this->command_.value(x...));
     SomfyProtocol().encode(dst, data);
   }

@@ -874,7 +874,8 @@ SomfyData, SomfyBinarySensor, SomfyTrigger, SomfyAction, SomfyDumper = declare_p
 SOMFY_SCHEMA = cv.Schema(
     {
         cv.Required(CONF_ADDRESS): cv.hex_uint32_t,
-        cv.Required(CONF_COMMAND): cv.hex_uint32_t,
+        cv.Required(CONF_COMMAND): cv.hex_uint8_t,
+        cv.Required(CONF_CODE): cv.hex_uint16_t,
     }
 )
 
@@ -887,6 +888,7 @@ def somfy_binary_sensor(var, config):
                 SomfyData,
                 ("command", config[CONF_COMMAND]),
                 ("address", config[CONF_ADDRESS]),
+                ("code", config[CONF_CODE]),
             )
         )
     )
@@ -908,6 +910,8 @@ async def somfy_action(var, config, args):
     cg.add(var.set_address(template_))
     template_ = await cg.templatable(config[CONF_COMMAND], args, cg.uint8)
     cg.add(var.set_command(template_))
+    template_ = await cg.templatable(config[CONF_CODE], args, cg.uint16)
+    cg.add(var.set_code(template_))
 
 
 # Raw

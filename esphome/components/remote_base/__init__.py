@@ -902,11 +902,11 @@ def somfy_dumper(var, config):
     pass
 
 
-@register_action("somfy", SomfyAction, SONY_SCHEMA)
+@register_action("somfy", SomfyAction, SOMFY_SCHEMA)
 async def somfy_action(var, config, args):
-    template_ = await cg.templatable(config[CONF_DATA], args, cg.uint32)
+    template_ = await cg.templatable(config[CONF_ADDRESS], args, cg.uint32)
     cg.add(var.set_data(template_))
-    template_ = await cg.templatable(config[CONF_NBITS], args, cg.uint32)
+    template_ = await cg.templatable(config[CONF_COMMAND], args, cg.uint8)
     cg.add(var.set_nbits(template_))
 
 

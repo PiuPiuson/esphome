@@ -905,9 +905,9 @@ def somfy_dumper(var, config):
 @register_action("somfy", SomfyAction, SOMFY_SCHEMA)
 async def somfy_action(var, config, args):
     template_ = await cg.templatable(config[CONF_ADDRESS], args, cg.uint32)
-    cg.add(var.set_data(template_))
+    cg.add(var.set_address(template_))
     template_ = await cg.templatable(config[CONF_COMMAND], args, cg.uint8)
-    cg.add(var.set_nbits(template_))
+    cg.add(var.set_command(template_))
 
 
 # Raw

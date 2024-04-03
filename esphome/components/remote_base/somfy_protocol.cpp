@@ -8,22 +8,21 @@ namespace remote_base {
 
 static const char *const TAG = "remote.somfy";
 
-static const uint32_t HEADER_HIGH_US = 2400;
-static const uint32_t HEADER_LOW_US = 600;
-static const uint32_t BIT_ONE_HIGH_US = 1200;
-static const uint32_t BIT_ZERO_HIGH_US = 600;
-static const uint32_t BIT_LOW_US = 600;
-
-void SomfyProtocol::_build_frame(uint8_t *frame, SomfyData data, uint16_t code) {
+void SomfyProtocol::_build_frame(uint8_t *frame, SomfyData data) {
   const uint8_t button = static_cast<uint8_t>(data.command);
 
-  frame[0] = 0xA7;                // Encryption key. Doesn't matter much
-  frame[1] = button << 4;         // Which button did  you press? The 4 LSB will be the checksum
-  frame[2] = code >> 8;           // Rolling code (big endian)
-  frame[3] = code;                // Rolling code
-  frame[4] = data.address >> 16;  // Remote address
-  frame[5] = data.address >> 8;   // Remote address
-  frame[6] = data.address;        // Remote address
+  this->_rolling_code += 1;
+
+  ESP_LOGD(TAG, "Creating frame for address %08X command %01X and rolling code %d", data.address, data.command,
+           this->_rolling_code);
+
+  frame[0] = 0xA7;                      // Encryption key. Doesn't matter much
+  frame[1] = button << 4;               // Which button did  you press? The 4 LSB will be the checksum
+  frame[2] = this->_rolling_code >> 8;  // Rolling code (big endian)
+  frame[3] = this->_rolling_code;       // Rolling code
+  frame[4] = data.address >> 16;        // Remote address
+  frame[5] = data.address >> 8;         // Remote address
+  frame[6] = data.address;              // Remote address
 
   // Checksum calculation: a XOR of all the nibbles
   uint8_t checksum = 0;
@@ -73,10 +72,8 @@ void SomfyProtocol::_send_frame(RemoteTransmitData *dst, uint8_t *frame, uint8_t
 }
 
 void SomfyProtocol::encode(RemoteTransmitData *dst, const SomfyData &data) {
-  this->_rolling_code += 1;
-
   uint8_t frame[7] = {0};
-  this->_build_frame(frame, data, this->_rolling_code);
+  this->_build_frame(frame, data);
 
   dst->set_carrier_frequency(433420);
   dst->reserve(7);
@@ -121,10 +118,10 @@ optional<SomfyData> SomfyProtocol::decode(RemoteReceiveData src) {
   //     }
   //   }
 
-  return;
+  return nullopt;
 }
 void SomfyProtocol::dump(const SomfyData &data) {
-  ESP_LOGI(TAG, "Received Somfy: data=0x%08" PRIX32 ", nbits=%d", data.data, data.nbits);
+  ESP_LOGI(TAG, "Received Somfy: address=0x%08" PRIX32 ", command=%d", data.address, data.command);
 }
 
 }  // namespace remote_base

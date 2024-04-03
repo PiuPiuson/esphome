@@ -36,7 +36,7 @@ class SomfyProtocol : public RemoteProtocol<SomfyData> {
  protected:
   uint16_t _rolling_code = 0;
 
-  void _build_frame(uint8_t *frame, SomfyData command, uint16_t code);
+  void _build_frame(uint8_t *frame, SomfyData command);
   void _send_frame(RemoteTransmitData *dst, uint8_t *frame, uint8_t sync);
 };
 
@@ -50,7 +50,7 @@ template<typename... Ts> class SomfyAction : public RemoteTransmitterActionBase<
   void encode(RemoteTransmitData *dst, Ts... x) override {
     SomfyData data{};
     data.address = this->address_.value(x...);
-    data.command = this->command_.value(x...);
+    data.command = static_cast<SomfyCommand>(this->command_.value(x...));
     SomfyProtocol().encode(dst, data);
   }
 };

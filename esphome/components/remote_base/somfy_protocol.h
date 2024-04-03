@@ -44,13 +44,13 @@ DECLARE_REMOTE_PROTOCOL(Somfy)
 
 template<typename... Ts> class SomfyAction : public RemoteTransmitterActionBase<Ts...> {
  public:
-  TEMPLATABLE_VALUE(uint32_t, data)
-  TEMPLATABLE_VALUE(uint8_t, nbits)
+  TEMPLATABLE_VALUE(uint32_t, address)
+  TEMPLATABLE_VALUE(uint8_t, command)
 
   void encode(RemoteTransmitData *dst, Ts... x) override {
     SomfyData data{};
-    data.data = this->data_.value(x...);
-    data.nbits = this->nbits_.value(x...);
+    data.address = this->address_.value(x...);
+    data.command = this->command_.value(x...);
     SomfyProtocol().encode(dst, data);
   }
 };

@@ -3,35 +3,35 @@ import esphome.config_validation as cv
 from esphome import automation
 from esphome.components import binary_sensor
 from esphome.const import (
+    CONF_ADDRESS,
+    CONF_CARRIER_FREQUENCY,
+    CONF_CHANNEL,
+    CONF_CODE,
+    CONF_COMMAND,
     CONF_COMMAND_REPEATS,
     CONF_DATA,
-    CONF_TRIGGER_ID,
-    CONF_NBITS,
-    CONF_ADDRESS,
-    CONF_COMMAND,
-    CONF_CODE,
-    CONF_PULSE_LENGTH,
-    CONF_SYNC,
-    CONF_ZERO,
-    CONF_ONE,
-    CONF_INVERTED,
-    CONF_PROTOCOL,
-    CONF_GROUP,
     CONF_DEVICE,
-    CONF_SECOND,
-    CONF_STATE,
-    CONF_CHANNEL,
     CONF_FAMILY,
-    CONF_REPEAT,
-    CONF_WAIT_TIME,
-    CONF_TIMES,
-    CONF_TYPE_ID,
-    CONF_CARRIER_FREQUENCY,
+    CONF_GROUP,
+    CONF_INVERTED,
+    CONF_LEVEL,
+    CONF_MAGNITUDE,
+    CONF_NBITS,
+    CONF_ONE,
+    CONF_PROTOCOL,
+    CONF_PULSE_LENGTH,
     CONF_RC_CODE_1,
     CONF_RC_CODE_2,
-    CONF_MAGNITUDE,
+    CONF_REPEAT,
+    CONF_SECOND,
+    CONF_STATE,
+    CONF_SYNC,
+    CONF_TIMES,
+    CONF_TRIGGER_ID,
+    CONF_TYPE_ID,
+    CONF_WAIT_TIME,
     CONF_WAND_ID,
-    CONF_LEVEL,
+    CONF_ZERO,
 )
 from esphome.core import coroutine
 from esphome.schema_extractors import SCHEMA_EXTRACT, schema_extractor
@@ -861,6 +861,49 @@ def sony_dumper(var, config):
 
 @register_action("sony", SonyAction, SONY_SCHEMA)
 async def sony_action(var, config, args):
+    template_ = await cg.templatable(config[CONF_DATA], args, cg.uint32)
+    cg.add(var.set_data(template_))
+    template_ = await cg.templatable(config[CONF_NBITS], args, cg.uint32)
+    cg.add(var.set_nbits(template_))
+
+
+# Somfy
+SomfyData, SomfyBinarySensor, SomfyTrigger, SomfyAction, SomfyDumper = declare_protocol(
+    "Somfy"
+)
+SOMFY_SCHEMA = cv.Schema(
+    {
+        cv.Required(CONF_ADDRESS): cv.hex_uint32_t,
+        cv.Required(CONF_COMMAND): cv.hex_uint32_t,
+    }
+)
+
+
+@register_binary_sensor("somfy", SomfyBinarySensor, SONY_SCHEMA)
+def somfy_binary_sensor(var, config):
+    cg.add(
+        var.set_data(
+            cg.StructInitializer(
+                SomfyData,
+                ("command", config[CONF_COMMAND]),
+                ("address", config[CONF_ADDRESS]),
+            )
+        )
+    )
+
+
+@register_trigger("somfy", SomfyTrigger, SomfyData)
+def somfy_trigger(var, config):
+    pass
+
+
+@register_dumper("somfy", SomfyDumper)
+def somfy_dumper(var, config):
+    pass
+
+
+@register_action("somfy", SomfyAction, SONY_SCHEMA)
+async def somfy_action(var, config, args):
     template_ = await cg.templatable(config[CONF_DATA], args, cg.uint32)
     cg.add(var.set_data(template_))
     template_ = await cg.templatable(config[CONF_NBITS], args, cg.uint32)

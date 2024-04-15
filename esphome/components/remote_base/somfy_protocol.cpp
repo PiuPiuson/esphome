@@ -83,16 +83,70 @@ void SomfyProtocol::encode(RemoteTransmitData *dst, const SomfyData &data) {
 
   this->_send_frame(dst, frame, 2);
 
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 5; i++) {
     this->_send_frame(dst, frame, 7);
   }
 }
 
 optional<SomfyData> SomfyProtocol::decode(RemoteReceiveData src) {
-  //   SomfyData out{
-  //       .data = 0,
-  //       .nbits = 0,
-  //   };
+  ESP_LOGD(TAG, "Received data length %u", src.size());
+
+  if (!src.expect_space(6500)) {
+    ESP_LOGD(TAG, "UNEXPECTED SYMBOL");
+    return {};
+  }
+
+  ESP_LOGD(TAG, "start");
+
+  uint8_t header_count = 0;
+  while (src.expect_item(4 * SYMBOL, 4 * SYMBOL)) {
+    header_count += 1;
+  }
+
+  ESP_LOGD(TAG, "header");
+  ESP_LOGD(TAG, "header_count %u", header_count);
+
+  if (!src.expect_mark(4550)) {
+    ESP_LOGD(TAG, "UNEXPECTED SYMBOL");
+    return {};
+  }
+
+  ESP_LOGD(TAG, "sync");
+
+  uint8_t frame[7] = {0};
+  for (int i = 0; i < 56; i++) {
+    if (src.expect_space(SYMBOL)) {
+      frame[i / 8] |= (1 << (7 - (i % 8)));
+      src.expect_mark(SYMBOL);
+
+    } else if (src.expect_mark(SYMBOL)) {
+      src.expect_space(SYMBOL);
+
+    } else if (src.expect_space(SYMBOL * 2)) {
+      src.expect_mark(SYMBOL);
+
+      i += 1;
+      if (i < 56) {
+        frame[i / 8] |= (1 << (7 - (i % 8)));
+      }
+
+    } else if (src.expect_mark(SYMBOL * 2)) {
+      src.expect_space(SYMBOL);
+      i += 1;
+    }
+  }
+
+  ESP_LOGD(TAG, "0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X", frame[0], frame[1], frame[3], frame[3], frame[4],
+           frame[5], frame[6]);
+  ESP_LOGD(TAG, "Frame: 0x%02X%02X%02X%02X%02X%02X%02X", frame[0], frame[1], frame[2], frame[3], frame[4], frame[5],
+           frame[6]);
+
+  SomfyData data = {};
+  data.command = static_cast<SomfyCommand>(frame[5] >> 4);
+  data.address = frame[0] | frame[1] << 8 | frame[2] << 16;
+
+  return data;
+
   //   if (!src.expect_item(HEADER_HIGH_US, HEADER_LOW_US))
   //     return {};
 

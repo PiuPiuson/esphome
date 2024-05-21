@@ -11,7 +11,7 @@ from esphome.const import (
     ICON_FAN,
     ICON_THERMOMETER,
     STATE_CLASS_MEASUREMENT,
-    UNIT_CELSIUS,
+    UNIT_CELSIUS
 )
 
 AUTO_LOAD = [
@@ -65,6 +65,7 @@ CONFIG_SCHEMA = (
                 icon=ICON_FAN,
                 entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
             ),
+
             # ----------- SWITCHES -------------
             cv.Optional(
                 CONF_LOCK_CONTROLS, default={CONF_NAME: "Lock Controls"}
@@ -100,32 +101,26 @@ async def to_code(config):
     await climate.register_climate(var, config)
 
     # ------------ SENSORS --------------
-    if CONF_WATER_TEMPERATURE in config:
-        conf = config[CONF_WATER_TEMPERATURE]
-        sens = await sensor.new_sensor(conf)
-        cg.add(var.set_water_temperature_sensor(sens))
+    conf = config[CONF_WATER_TEMPERATURE]
+    sens = await sensor.new_sensor(conf)
+    cg.add(var.set_water_temperature_sensor(sens))
 
-    if CONF_FAN_SPEED in config:
-        conf = config[CONF_FAN_SPEED]
-        sens = await sensor.new_sensor(conf)
-        cg.add(var.set_fan_speed_sensor(sens))
+    conf = config[CONF_FAN_SPEED]
+    sens = await sensor.new_sensor(conf)
+    cg.add(var.set_fan_speed_sensor(sens))
 
     # ----------- SWITCHES -------------
-
-    if CONF_LOCK_CONTROLS in config:
-        conf = config[CONF_LOCK_CONTROLS]
-        sw = await switch.new_switch(conf)
-        await cg.register_component(sw, conf)
-        cg.add(sw.set_parent(var))
-        cg.add(sw.set_id(CONF_LOCK_CONTROLS))
-        cg.add(var.set_lock_controls_switch(sw))
+    conf = config[CONF_LOCK_CONTROLS]
+    sw = await switch.new_switch(conf)
+    await cg.register_component(sw, conf)
+    cg.add(sw.set_parent(var))
+    cg.add(sw.set_id(CONF_LOCK_CONTROLS))
+    cg.add(var.set_lock_controls_switch(sw))
 
     # ------------ NUMBERS --------------
-
-    if CONF_AIR_TEMPERATURE_OFFSET in config:
-        conf = config[CONF_AIR_TEMPERATURE_OFFSET]
-        num = await number.new_number(conf, min_value=-12, max_value=12, step=0.1)
-        await cg.register_component(num, conf)
-        cg.add(num.set_parent(var))
-        cg.add(num.set_id(CONF_AIR_TEMPERATURE_OFFSET))
-        cg.add(var.set_air_temperature_offset_number(num))
+    conf = config[CONF_AIR_TEMPERATURE_OFFSET]
+    num = await number.new_number(conf, min_value=-12, max_value=12, step=0.1)
+    await cg.register_component(num, conf)
+    cg.add(num.set_parent(var))
+    cg.add(num.set_id(CONF_AIR_TEMPERATURE_OFFSET))
+    cg.add(var.set_air_temperature_offset_number(num))

@@ -175,6 +175,17 @@ void DaikinAlthermaHPC::process_read_queue(const std::vector<uint8_t> &data) {
       }
       break;
 
+    case Register::OutputStatus:
+      if (((data[1] >> 2) & 1U) == 1) {
+        this->action = climate::ClimateAction::CLIMATE_ACTION_COOLING;
+      } else if (((data[1] >> 3) & 1U) == 1) {
+        this->action = climate::ClimateAction::CLIMATE_ACTION_HEATING;
+      } else {
+        this->action = climate::ClimateAction::CLIMATE_ACTION_IDLE;
+      }
+
+      break;
+
     case Register::FanSpeed:
       if (this->fan_speed_sensor_ != nullptr) {
         this->fan_speed_sensor_->publish_state(this->data_to_int16(data));
@@ -192,9 +203,11 @@ void DaikinAlthermaHPC::process_read_queue(const std::vector<uint8_t> &data) {
     case Register::HeatCoolSelect:
       if (this->standby_) {
         this->mode = climate::ClimateMode::CLIMATE_MODE_OFF;
+        this->action = climate::ClimateAction::CLIMATE_ACTION_OFF;
       } else {
         this->mode = this->heat_cool_mode_to_climate_mode(static_cast<HeatCoolMode>(this->data_to_int16(data)));
       }
+
       this->publish_state();
       break;
 
@@ -215,6 +228,7 @@ void DaikinAlthermaHPC::update() {
 
   this->modbus_read_queue_.push(Register::AirTemperature);
   this->modbus_read_queue_.push(Register::WaterTemperature);
+  this->modbus_read_queue_.push(Register::OutputStatus);
   this->modbus_read_queue_.push(Register::FanSpeed);
   this->modbus_read_queue_.push(Register::AirTemperatureOffset);
   this->modbus_read_queue_.push(Register::SetPoint);
@@ -266,6 +280,7 @@ climate::ClimateTraits DaikinAlthermaHPC::traits() {
   traits.set_supports_two_point_target_temperature(false);
   traits.set_supports_target_humidity(false);
   traits.set_supports_current_temperature(true);
+  traits.set_supports_action(true);
   traits.set_supported_fan_modes({
       climate::ClimateFanMode::CLIMATE_FAN_AUTO,
       climate::ClimateFanMode::CLIMATE_FAN_HIGH,
@@ -279,6 +294,7 @@ void DaikinAlthermaHPC::setup() {
   this->set_visual_max_temperature_override(28);
   this->set_visual_min_temperature_override(16);
   this->set_visual_temperature_step_override(0.1, 0.5);
+  this->action = climate::ClimateAction::CLIMATE_ACTION_IDLE;
 }
 
 void DaikinAlthermaHPC::control(const climate::ClimateCall &call) {
@@ -321,7 +337,7 @@ void DaikinAlthermaHPC::toggle_switch(const std::string &id, bool state) {
 }
 
 // make it so that writeInt and writeBool actually push into the queue.
-// THe queue should be a map, we iterate through it and send all values
+// The queue should be a map, we iterate through it and send all values
 
 void DaikinAlthermaHPC::set_number(const std::string &id, float value) {
   if (id == "air_temperature_offset") {

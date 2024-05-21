@@ -84,7 +84,8 @@ class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, publ
   enum class Register : uint16_t {
     AirTemperature = 0,
     WaterTemperature = 1,
-    FanSpeed = 9,
+    OutputStatus = 9,
+    FanSpeed = 15,
     Config = 201,
     SetPoint = 231,
     HeatCoolSelect = 233,

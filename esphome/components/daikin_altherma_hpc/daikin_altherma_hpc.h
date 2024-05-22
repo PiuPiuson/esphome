@@ -60,6 +60,7 @@ class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, publ
   void set_lock_controls_switch(DaikinAlthermaHPCSwitch *sw) { this->lock_controls_switch_ = sw; }
 
   void set_air_temperature_offset_number(DaikinAlthermaHPCNumber *num) { this->air_temperature_offset_numer_ = num; }
+  void set_min_fan_speed_low_night_number(DaikinAlthermaHPCNumber *num) { this->min_fan_speed_low_night_number_ = num; }
 
   void toggle_switch(const std::string &id, bool state);
   void set_number(const std::string &id, float value);
@@ -77,16 +78,18 @@ class DaikinAlthermaHPC : public climate::Climate, public PollingComponent, publ
   DaikinAlthermaHPCSwitch *lock_controls_switch_{nullptr};
 
   DaikinAlthermaHPCNumber *air_temperature_offset_numer_{nullptr};
+  DaikinAlthermaHPCNumber *min_fan_speed_low_night_number_{nullptr};
 
   bool standby_{};
   bool lock_controls_{};
 
-  enum class Register : uint16_t {
+  enum class Register : uint8_t {
     AirTemperature = 0,
     WaterTemperature = 1,
     OutputStatus = 9,
     FanSpeed = 15,
     Config = 201,
+    MinFanSpeedLowNight = 210,
     SetPoint = 231,
     HeatCoolSelect = 233,
     AirTemperatureOffset = 242,

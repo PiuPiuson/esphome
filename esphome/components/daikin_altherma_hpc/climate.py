@@ -11,7 +11,8 @@ from esphome.const import (
     ICON_FAN,
     ICON_THERMOMETER,
     STATE_CLASS_MEASUREMENT,
-    UNIT_CELSIUS
+    UNIT_CELSIUS,
+    UNIT_REVOLUTIONS_PER_MINUTE,
 )
 
 AUTO_LOAD = [
@@ -26,6 +27,9 @@ CONF_AIR_TEMPERATURE_OFFSET = "air_temperature_offset"
 CONF_WATER_TEMPERATURE = "water_temperature"
 CONF_LOCK_CONTROLS = "lock_controls"
 CONF_FAN_SPEED = "motor_speed"
+CONF_MIN_FAN_SPEED_LOW_QUIET = "min_fan_speed_low_night"
+
+ICON_FAN_CHEVRON_DOWN = "mdi:fan-chevron-down"
 
 daikin_altherma_hpc_ns = cg.esphome_ns.namespace("daikin_altherma_hpc")
 DaikinAlthermaHPC = daikin_altherma_hpc_ns.class_(
@@ -64,6 +68,7 @@ CONFIG_SCHEMA = (
                 state_class=STATE_CLASS_MEASUREMENT,
                 icon=ICON_FAN,
                 entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
+                unit_of_measurement=UNIT_REVOLUTIONS_PER_MINUTE,
             ),
 
             # ----------- SWITCHES -------------
@@ -87,9 +92,19 @@ CONFIG_SCHEMA = (
             ).extend(
                 cv.COMPONENT_SCHEMA
             ),
+            cv.Optional(
+                CONF_MIN_FAN_SPEED_LOW_QUIET,
+                default={CONF_NAME: "Minimum Fan Speed in Low and Quiet"},
+            ): number.number_schema(
+                DaikinAlthermaHPCNumber,
+                entity_category=ENTITY_CATEGORY_CONFIG,
+                icon=ICON_FAN_CHEVRON_DOWN,
+            ).extend(
+                cv.COMPONENT_SCHEMA
+            ),
         }
     )
-    .extend(cv.polling_component_schema("10s"))
+    .extend(cv.polling_component_schema("15s"))
     .extend(modbus.modbus_device_schema(0x01))
 )
 
@@ -124,3 +139,10 @@ async def to_code(config):
     cg.add(num.set_parent(var))
     cg.add(num.set_id(CONF_AIR_TEMPERATURE_OFFSET))
     cg.add(var.set_air_temperature_offset_number(num))
+
+    conf = config[CONF_MIN_FAN_SPEED_LOW_QUIET]
+    num = await number.new_number(conf, min_value=400, max_value=1700, step=1)
+    await cg.register_component(num, conf)
+    cg.add(num.set_parent(var))
+    cg.add(num.set_id(CONF_MIN_FAN_SPEED_LOW_QUIET))
+    cg.add(var.set_min_fan_speed_low_night_number(num))

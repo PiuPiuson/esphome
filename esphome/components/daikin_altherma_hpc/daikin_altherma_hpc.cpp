@@ -192,6 +192,12 @@ void DaikinAlthermaHPC::process_read_queue(const std::vector<uint8_t> &data) {
       }
       break;
 
+    case Register::MinFanSpeedLowNight:
+      if (this->min_fan_speed_low_night_number_ != nullptr) {
+        this->min_fan_speed_low_night_number_->publish_state(this->data_to_int16(data));
+      }
+      break;
+
     case Register::SetPoint:
       this->target_temperature = this->data_to_temperature(data);
       break;
@@ -230,6 +236,7 @@ void DaikinAlthermaHPC::update() {
   this->modbus_read_queue_.push(Register::WaterTemperature);
   this->modbus_read_queue_.push(Register::OutputStatus);
   this->modbus_read_queue_.push(Register::FanSpeed);
+  this->modbus_read_queue_.push(Register::MinFanSpeedLowNight);
   this->modbus_read_queue_.push(Register::AirTemperatureOffset);
   this->modbus_read_queue_.push(Register::SetPoint);
   this->modbus_read_queue_.push(Register::Config);
@@ -342,6 +349,10 @@ void DaikinAlthermaHPC::toggle_switch(const std::string &id, bool state) {
 void DaikinAlthermaHPC::set_number(const std::string &id, float value) {
   if (id == "air_temperature_offset") {
     this->modbus_write_map_[Register::AirTemperatureOffset] = this->temperature_to_int16(value);
+  }
+
+  else if (id == "min_fan_speed_low_night") {
+    this->modbus_write_map_[Register::MinFanSpeedLowNight] = value;
   }
 }
 
